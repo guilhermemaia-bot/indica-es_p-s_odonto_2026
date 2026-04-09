@@ -624,6 +624,26 @@ function processData(matRows, indRows) {
   return result;
 }
 
+
+  async function fetchWithProxy(url) {
+    const proxies = [
+      u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+      u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    ];
+    let lastErr;
+    for (const proxy of proxies) {
+      try {
+        const res = await fetch(proxy(url), {cache:'no-store'});
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const text = await res.text();
+        if (text && text.length > 10) return text;
+        throw new Error('Resposta vazia');
+      } catch(e) { lastErr = e; }
+    }
+    throw new Error('Todos os proxies falharam: ' + lastErr.message);
+  }
+
 // ══ LOAD DATA ═════════════════════════════════════════════════════════════
 async function loadData(isRefresh) {
   const overlay = document.getElementById('overlay');
@@ -637,9 +657,9 @@ async function loadData(isRefresh) {
 
   try {
     setProgress(5, 'Buscando matriculados...');
-    const matText = await (await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(SHEETS.matriculados)}`, {cache:"no-store"})).text();
+    const matText = await fetchWithProxy(SHEETS.matriculados);
     setProgress(45, 'Buscando indicações...');
-    const indText = await (await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(SHEETS.indicacoes)}`, {cache:"no-store"})).text();
+    const indText = await fetchWithProxy(SHEETS.indicacoes);
     setProgress(80, 'Cruzando dados...');
 
     const { rows: matRows } = parseCSV(matText);
