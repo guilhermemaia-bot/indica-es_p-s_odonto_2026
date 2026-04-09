@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Programa de Indicações</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -15,139 +15,75 @@
   --green:#34d48a;--green-dim:rgba(52,212,138,0.10);
   --yellow:#f5a623;--yellow-dim:rgba(245,166,35,0.10);
   --red:#f05252;--red-dim:rgba(240,82,82,0.10);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,0.10);
   --r:10px;--r-sm:6px;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-a{text-decoration:none}
-button{cursor:pointer;font-family:'DM Sans',sans-serif}
+a{text-decoration:none} button{cursor:pointer;font-family:'DM Sans',sans-serif}
 
-/* ── LOGIN ─────────────────────────────────────────── */
-#login-screen{
-  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-  background:var(--bg);z-index:200;
-  background-image:radial-gradient(ellipse at 60% 20%,rgba(79,142,247,0.07) 0%,transparent 60%),
-                   radial-gradient(ellipse at 20% 80%,rgba(52,212,138,0.05) 0%,transparent 50%);
-}
-.login-card{
-  width:380px;background:var(--surface);border:1px solid var(--border);
-  border-radius:16px;padding:40px;
-  box-shadow:0 24px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.03);
-}
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:200;background-image:radial-gradient(ellipse at 60% 20%,rgba(79,142,247,0.07) 0%,transparent 60%),radial-gradient(ellipse at 20% 80%,rgba(52,212,138,0.05) 0%,transparent 50%)}
+.login-card{width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;box-shadow:0 24px 80px rgba(0,0,0,0.5)}
 .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
-.login-logo-icon{
-  width:44px;height:44px;background:var(--accent);border-radius:10px;
-  display:flex;align-items:center;justify-content:center;font-size:22px;
-  box-shadow:0 0 20px var(--accent-glow);
-}
+.login-logo-icon{width:44px;height:44px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 20px var(--accent-glow)}
 .login-logo h1{font-size:16px;font-weight:600;line-height:1.3}
 .login-logo p{font-size:12px;color:var(--muted);margin-top:2px}
 .login-label{font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.04em}
-.login-input{
-  width:100%;background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;
-  font-size:14px;padding:11px 14px;outline:none;transition:border .15s;margin-bottom:16px;
-}
+.login-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 14px;outline:none;transition:border .15s;margin-bottom:16px}
 .login-input:focus{border-color:var(--accent)}
-.login-btn{
-  width:100%;padding:12px;background:var(--accent);color:#fff;border:none;
-  border-radius:var(--r-sm);font-size:14px;font-weight:600;
-  transition:all .15s;letter-spacing:.01em;
-}
+.login-btn{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:600;transition:all .15s}
 .login-btn:hover{background:#3a7de8;box-shadow:0 4px 20px var(--accent-glow)}
 .login-error{font-size:12px;color:var(--red);margin-top:10px;min-height:18px;text-align:center}
-.login-divider{border:none;border-top:1px solid var(--border);margin:24px 0}
-.login-hint{font-size:11px;color:var(--muted2);text-align:center;line-height:1.6}
+.login-hint{font-size:11px;color:var(--muted2);text-align:center;line-height:1.6;margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
 
-/* ── LAYOUT ────────────────────────────────────────── */
+/* ── LAYOUT ── */
 .layout{display:flex;min-height:100vh}
-.sidebar{
-  width:230px;min-height:100vh;background:var(--surface);
-  border-right:1px solid var(--border);display:flex;flex-direction:column;
-  padding:24px 0;position:fixed;top:0;left:0;bottom:0;z-index:10;
-  transition:transform .3s;
-}
+.sidebar{width:230px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;bottom:0;z-index:10}
 .logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
-.logo-icon{
-  width:36px;height:36px;background:var(--accent);border-radius:8px;
-  display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:8px;
-}
+.logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:8px}
 .logo h2{font-size:13px;font-weight:600;line-height:1.3}
 .logo p{font-size:11px;color:var(--muted);margin-top:2px}
-.nav-item{
-  display:flex;align-items:center;gap:10px;padding:10px 20px;
-  font-size:13px;font-weight:500;color:var(--muted);
-  border-left:3px solid transparent;transition:all .15s;
-}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;font-weight:500;color:var(--muted);border-left:3px solid transparent;transition:all .15s}
 .nav-item:hover{color:var(--text);background:var(--surface2)}
 .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim)}
 .nav-icon{font-size:16px}
 .nav-section{padding:6px 20px 4px;font-size:10px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:8px}
 .sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
-.user-chip{
-  display:flex;align-items:center;gap:8px;padding:8px 10px;
-  background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border);
-  margin-bottom:10px;
-}
-.user-avatar{
-  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;
-}
+.user-chip{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:10px}
+.user-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
 .user-avatar.admin{background:rgba(79,142,247,0.2);color:var(--accent)}
 .user-avatar.colab{background:rgba(52,212,138,0.2);color:var(--green)}
-.user-name{font-size:12px;font-weight:500;flex:1}
+.user-name{font-size:12px;font-weight:500}
 .user-role{font-size:10px;color:var(--muted);margin-top:1px}
-.logout-btn{
-  width:100%;padding:7px;background:transparent;border:1px solid var(--border);
-  border-radius:var(--r-sm);font-size:12px;color:var(--muted);transition:all .15s;
-}
+.logout-btn{width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;color:var(--muted);transition:all .15s}
 .logout-btn:hover{color:var(--red);border-color:rgba(240,82,82,0.3)}
 .sync-info{font-size:11px;color:var(--muted2);margin-bottom:8px;line-height:1.5}
 .sync-info span{color:var(--muted)}
-.sync-btn{
-  width:100%;display:flex;align-items:center;justify-content:center;gap:6px;
-  padding:7px;background:var(--accent-dim);border:1px solid rgba(79,142,247,0.2);
-  border-radius:var(--r-sm);font-size:12px;color:var(--accent);font-weight:500;
-  transition:all .15s;margin-bottom:10px;
-}
+.sync-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:7px;background:var(--accent-dim);border:1px solid rgba(79,142,247,0.2);border-radius:var(--r-sm);font-size:12px;color:var(--accent);font-weight:500;transition:all .15s;margin-bottom:10px}
 .sync-btn:hover{background:var(--accent-glow)}
 .sync-btn:disabled{opacity:.4;cursor:not-allowed}
 @keyframes spin{to{transform:rotate(360deg)}}
-.spinning{display:inline-block;animation:spin .8s linear infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* ── MAIN ──────────────────────────────────────────── */
+/* ── MAIN ── */
 .main{margin-left:230px;flex:1;display:flex;flex-direction:column}
-.topbar{
-  background:var(--surface);border-bottom:1px solid var(--border);
-  padding:14px 28px;display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:5;
-}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
 .topbar-title{font-size:15px;font-weight:600}
 .topbar-sub{font-size:12px;color:var(--muted);margin-top:1px}
-.badge{
-  display:flex;align-items:center;gap:6px;font-size:11px;
-  padding:4px 10px;border-radius:20px;
-}
+.badge{display:flex;align-items:center;gap:6px;font-size:11px;padding:4px 10px;border-radius:20px}
 .badge-live{color:var(--green);background:var(--green-dim);border:1px solid rgba(52,212,138,0.2)}
 .badge-loading{color:var(--yellow);background:var(--yellow-dim);border:1px solid rgba(245,166,35,0.2)}
 .badge-error{color:var(--red);background:var(--red-dim);border:1px solid rgba(240,82,82,0.2)}
 .badge-live::before,.badge-loading::before,.badge-error::before{content:'●';font-size:8px}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .badge-live::before{animation:pulse 1.5s infinite}
 .content{padding:28px}
 .view{display:none}
 .view.active{display:block}
 
-/* ── LOADING OVERLAY ───────────────────────────────── */
-.overlay{
-  position:fixed;inset:0;background:rgba(13,15,20,.88);
-  display:flex;align-items:center;justify-content:center;
-  z-index:150;backdrop-filter:blur(4px);
-}
+/* ── OVERLAY ── */
+.overlay{position:fixed;inset:0;background:rgba(13,15,20,.88);display:flex;align-items:center;justify-content:center;z-index:150;backdrop-filter:blur(4px)}
 .overlay.hidden{display:none}
-.overlay-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:36px 48px;text-align:center;min-width:300px;
-}
+.overlay-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:36px 48px;text-align:center;min-width:300px}
 .overlay-icon{font-size:36px;margin-bottom:14px}
 .overlay-title{font-size:15px;font-weight:600;margin-bottom:6px}
 .overlay-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
@@ -155,94 +91,91 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 .prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
 .prog-step{font-size:12px;color:var(--muted);margin-top:10px;min-height:18px}
 
-/* ── KPI GRID ──────────────────────────────────────── */
+/* ── MODAL ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal-backdrop.hidden{display:none}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:440px;max-width:95vw;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.modal-field{margin-bottom:14px}
+.modal-field label{font-size:12px;font-weight:500;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.modal-field input,.modal-field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px;outline:none;transition:border .15s}
+.modal-field input:focus,.modal-field select:focus{border-color:var(--accent)}
+.modal-field select option{background:var(--surface2)}
+.modal-actions{display:flex;gap:10px;margin-top:20px}
+.btn{padding:10px 18px;border-radius:var(--r-sm);font-size:13px;font-weight:500;border:none;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#3a7de8}
+.btn-ghost{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text)}
+.btn-green{background:var(--green);color:#0d1a0d;font-weight:600}
+.btn-green:hover{background:#2bc97a}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(240,82,82,0.2)}
+.btn-danger:hover{background:rgba(240,82,82,0.2)}
+
+/* ── KPI ── */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
-.kpi-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:20px;position:relative;overflow:hidden;
-}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
 .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
 .kpi-blue::after{background:var(--accent)}.kpi-green::after{background:var(--green)}
 .kpi-yellow::after{background:var(--yellow)}.kpi-red::after{background:var(--red)}
+.kpi-purple::after{background:var(--purple)}
 .kpi-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em}
 .kpi-value{font-size:32px;font-weight:300;margin:6px 0 4px;font-family:'DM Mono',monospace}
 .kpi-blue .kpi-value{color:var(--accent)}.kpi-green .kpi-value{color:var(--green)}
 .kpi-yellow .kpi-value{color:var(--yellow)}.kpi-red .kpi-value{color:var(--red)}
+.kpi-purple .kpi-value{color:var(--purple)}
 .kpi-sub{font-size:11px;color:var(--muted)}
 
-/* ── TABLE ─────────────────────────────────────────── */
+/* ── TABLE ── */
 .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.table-header{
-  padding:14px 20px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
-}
+.table-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .table-header strong{font-size:13px;font-weight:600}
 .table-count{font-size:11px;color:var(--muted);margin-top:2px}
 .filter-tabs{display:flex;gap:4px;flex-wrap:wrap}
-.filter-tab{
-  padding:5px 12px;border-radius:var(--r-sm);font-size:12px;
-  color:var(--muted);background:transparent;border:1px solid transparent;transition:all .15s;
-}
+.filter-tab{padding:5px 12px;border-radius:var(--r-sm);font-size:12px;color:var(--muted);background:transparent;border:1px solid transparent;transition:all .15s}
 .filter-tab:hover{background:var(--surface2);color:var(--text)}
 .filter-tab.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(79,142,247,0.2)}
 .tscroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-th{
-  text-align:left;padding:10px 16px;font-size:11px;font-weight:600;
-  color:var(--muted);text-transform:uppercase;letter-spacing:.05em;
-  border-bottom:1px solid var(--border);background:rgba(255,255,255,.01);white-space:nowrap;
-}
-td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+th{text-align:left;padding:10px 16px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:rgba(255,255,255,.01);white-space:nowrap}
+td{padding:11px 16px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(255,255,255,.02)}
-.tn{font-weight:500}
-.te{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
-.td{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
+.tn{font-weight:500}.te{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}.td{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
 
-/* ── STATUS PILLS ──────────────────────────────────── */
+/* ── PILLS ── */
 .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
 .pill::before{content:'●';font-size:8px}
 .pill-lib{background:var(--green-dim);color:var(--green);border:1px solid rgba(52,212,138,0.2)}
 .pill-agu{background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(245,166,35,0.2)}
 .pill-inv{background:var(--red-dim);color:var(--red);border:1px solid rgba(240,82,82,0.2)}
+.pill-entregue{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,0.2)}
+.pill-pendente{background:rgba(245,166,35,0.08);color:var(--yellow);border:1px solid rgba(245,166,35,0.15)}
 
-/* ── PAGINATION ────────────────────────────────────── */
+/* ── PAGINATION ── */
 .pagination{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
 .page-btns{display:flex;gap:4px}
-.page-btn{
-  padding:4px 10px;border-radius:var(--r-sm);font-size:12px;
-  background:var(--surface2);border:1px solid var(--border);color:var(--muted);transition:all .15s;
-}
-.page-btn:hover:not(:disabled){background:var(--accent-dim);color:var(--accent);border-color:rgba(79,142,247,0.3)}
+.page-btn{padding:4px 10px;border-radius:var(--r-sm);font-size:12px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);transition:all .15s}
+.page-btn:hover:not(:disabled){background:var(--accent-dim);color:var(--accent)}
 .page-btn:disabled{opacity:.35;cursor:not-allowed}
 
-/* ── SEARCH BOX ────────────────────────────────────── */
+/* ── SEARCH ── */
 .search-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:20px}
 .search-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:block}
 .search-row{display:flex;gap:10px}
-.search-input{
-  flex:1;background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;
-  font-size:14px;padding:10px 14px;outline:none;transition:border .15s;
-}
+.search-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px;outline:none;transition:border .15s}
 .search-input:focus{border-color:var(--accent)}
 .search-input::placeholder{color:var(--muted)}
-.btn-ghost{
-  padding:10px 16px;background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--r-sm);font-size:13px;color:var(--muted);transition:all .15s;
-}
-.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
 
-/* ── INDICADOR CARDS ───────────────────────────────── */
+/* ── INDICADOR CARDS ── */
 .ind-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
-.ind-header{
-  padding:16px 20px;display:flex;align-items:center;justify-content:space-between;
-  cursor:pointer;transition:background .15s;
-}
+.ind-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .15s}
 .ind-header:hover{background:var(--surface2)}
 .ind-info h4{font-size:14px;font-weight:600}
 .ind-info p{font-size:12px;color:var(--muted);margin-top:2px}
-.ind-meta{display:flex;align-items:center;gap:12px}
+.ind-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ind-count{font-size:12px;color:var(--muted)}
 .chevron{color:var(--muted);font-size:11px;transition:transform .2s}
 .ind-card.open .chevron{transform:rotate(180deg)}
@@ -250,14 +183,31 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .ind-card.open .ind-body{display:block}
 .minibadges{display:flex;gap:6px;flex-wrap:wrap}
 
-/* ── EMPTY ─────────────────────────────────────────── */
+/* ── BRINDE BADGE ── */
+.brinde-entregue{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;font-size:11px;background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,0.2);white-space:nowrap}
+.brinde-pendente{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;font-size:11px;background:rgba(255,255,255,0.04);color:var(--muted);border:1px solid var(--border);white-space:nowrap}
+
+/* ── ENTREGA INFO ── */
+.entrega-info{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+.entrega-info strong{color:var(--purple)}
+
+/* ── UPLOAD AREA ── */
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--r-sm);padding:28px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+.upload-zone:hover{border-color:var(--accent);background:var(--accent-dim)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone p{font-size:13px;color:var(--muted);margin-top:6px}
+
+/* ── EMPTY ── */
 .empty{padding:52px 20px;text-align:center;color:var(--muted)}
 .empty-icon{font-size:36px;margin-bottom:12px}
 .empty p{font-size:13px}
 
-/* ── NO-PRINT / NO-SELECT ──────────────────────────── */
-.no-copy{user-select:none;-webkit-user-select:none}
+/* ── SECTION CARD ── */
+.section-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:20px}
+.section-card h3{font-size:14px;font-weight:600;margin-bottom:6px}
+.section-card p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
 
+.no-copy{user-select:none;-webkit-user-select:none}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
@@ -265,26 +215,22 @@ tr:hover td{background:rgba(255,255,255,.02)}
 </head>
 <body>
 
-<!-- ══ LOGIN SCREEN ══════════════════════════════════════════════════════ -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">
       <div class="login-logo-icon">🎓</div>
-      <div>
-        <h1>Programa de<br>Indicações</h1>
-        <p>Backoffice — Acesso restrito</p>
-      </div>
+      <div><h1>Programa de<br>Indicações</h1><p>Backoffice — Acesso restrito</p></div>
     </div>
     <label class="login-label" for="pwd-input">Senha de acesso</label>
     <input class="login-input" id="pwd-input" type="password" placeholder="Digite sua senha..." onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-error" id="login-error"></div>
-    <hr class="login-divider">
-    <p class="login-hint">Acesso exclusivo para colaboradores autorizados.<br>Em caso de dúvidas, contate o administrador.</p>
+    <p class="login-hint">Acesso exclusivo para colaboradores autorizados.</p>
   </div>
 </div>
 
-<!-- ══ LOADING OVERLAY ═══════════════════════════════════════════════════ -->
+<!-- LOADING OVERLAY -->
 <div class="overlay hidden" id="overlay">
   <div class="overlay-card">
     <div class="overlay-icon">📡</div>
@@ -295,18 +241,39 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
-<!-- ══ APP ═══════════════════════════════════════════════════════════════ -->
-<div class="layout" id="app" style="display:none">
+<!-- MODAL ENTREGA -->
+<div class="modal-backdrop hidden" id="modal-entrega">
+  <div class="modal">
+    <h3>🎁 Registrar Entrega de Brinde</h3>
+    <div class="modal-sub" id="modal-beneficiario-info">—</div>
+    <div class="modal-field">
+      <label>Quem retirou o brinde?</label>
+      <div id="modal-checkboxes" style="display:flex;flex-direction:column;gap:8px;margin-bottom:4px"></div>
+    </div>
+    <div class="modal-field">
+      <label>Nome de quem entregou</label>
+      <input id="modal-entregador-nome" type="text" placeholder="Ex: Ana Lima">
+    </div>
+    <div class="modal-field">
+      <label>Unidade</label>
+      <input id="modal-entregador-unidade" type="text" placeholder="Ex: Campinas, SP">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-green" onclick="confirmarEntrega()" style="flex:1">✅ Confirmar Entrega</button>
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+    </div>
+    <div id="modal-error" style="font-size:12px;color:var(--red);margin-top:10px;min-height:16px"></div>
+  </div>
+</div>
 
-  <!-- SIDEBAR -->
+<!-- APP -->
+<div class="layout" id="app" style="display:none">
   <nav class="sidebar" id="sidebar">
     <div class="logo">
       <div class="logo-icon">🎓</div>
-      <h2>Programa de<br>Indicações</h2>
-      <p>Backoffice</p>
+      <h2>Programa de<br>Indicações</h2><p>Backoffice</p>
     </div>
 
-    <!-- Admin-only nav -->
     <div id="nav-admin" style="display:none">
       <div class="nav-section">Visão geral</div>
       <a class="nav-item" id="nav-dashboard" onclick="showView('dashboard',this)" href="#">
@@ -316,68 +283,48 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <a class="nav-item" id="nav-indicado" onclick="showView('consulta-indicado',this)" href="#">
         <span class="nav-icon">🔍</span> Buscar Indicado
       </a>
+      <div class="nav-section">Administração</div>
+      <a class="nav-item" id="nav-admin-tools" onclick="showView('admin-tools',this)" href="#">
+        <span class="nav-icon">⚙️</span> Ferramentas Admin
+      </a>
     </div>
 
-    <!-- Shared nav -->
-    <div class="nav-section" id="nav-section-shared">Consultas</div>
-    <a class="nav-item active" id="nav-indicador" onclick="showView('consulta-indicador',this)" href="#">
-      <span class="nav-icon">👤</span> Buscar Indicador
+    <div class="nav-section">Consultas</div>
+    <a class="nav-item active" id="nav-busca" onclick="showView('consulta-geral',this)" href="#">
+      <span class="nav-icon">🔍</span> Buscar Beneficiário
     </a>
 
     <div class="sidebar-footer">
       <div class="user-chip">
         <div class="user-avatar" id="user-avatar">—</div>
-        <div>
-          <div class="user-name" id="user-name">—</div>
-          <div class="user-role" id="user-role">—</div>
-        </div>
+        <div><div class="user-name" id="user-name">—</div><div class="user-role" id="user-role">—</div></div>
       </div>
-
-      <!-- Admin-only sync -->
       <div id="sync-section" style="display:none">
         <div class="sync-info">Atualizado em<br><span id="sync-time">—</span></div>
         <button class="sync-btn" id="sync-btn" onclick="loadData(true)">🔄 Atualizar dados</button>
       </div>
-
       <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </nav>
 
-  <!-- MAIN -->
   <div class="main">
     <div class="topbar">
       <div>
-        <div class="topbar-title" id="topbar-title">Consultar Indicador</div>
-        <div class="topbar-sub" id="topbar-sub">Busque um indicador e veja o status de seus indicados</div>
+        <div class="topbar-title" id="topbar-title">Buscar Beneficiário</div>
+        <div class="topbar-sub" id="topbar-sub">Busque por indicador ou indicado</div>
       </div>
       <div class="badge badge-live" id="status-badge">Ao vivo</div>
     </div>
 
     <div class="content">
 
-      <!-- ── DASHBOARD (admin only) ── -->
+      <!-- DASHBOARD -->
       <div class="view" id="view-dashboard">
         <div class="kpi-grid">
-          <div class="kpi-card kpi-blue">
-            <div class="kpi-label">Total de Indicações</div>
-            <div class="kpi-value" id="kpi-total">—</div>
-            <div class="kpi-sub">registros processados</div>
-          </div>
-          <div class="kpi-card kpi-green">
-            <div class="kpi-label">Benefícios Liberados</div>
-            <div class="kpi-value" id="kpi-lib">—</div>
-            <div class="kpi-sub">matrícula confirmada</div>
-          </div>
-          <div class="kpi-card kpi-yellow">
-            <div class="kpi-label">Aguardando Matrícula</div>
-            <div class="kpi-value" id="kpi-agu">—</div>
-            <div class="kpi-sub">indicados sem match</div>
-          </div>
-          <div class="kpi-card kpi-red">
-            <div class="kpi-label">Data Inválida</div>
-            <div class="kpi-value" id="kpi-inv">—</div>
-            <div class="kpi-sub">matrícula anterior à indicação</div>
-          </div>
+          <div class="kpi-card kpi-blue"><div class="kpi-label">Total de Indicações</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub">registros processados</div></div>
+          <div class="kpi-card kpi-green"><div class="kpi-label">Benefícios Liberados</div><div class="kpi-value" id="kpi-lib">—</div><div class="kpi-sub">matrícula confirmada</div></div>
+          <div class="kpi-card kpi-yellow"><div class="kpi-label">Aguardando Matrícula</div><div class="kpi-value" id="kpi-agu">—</div><div class="kpi-sub">indicados sem match</div></div>
+          <div class="kpi-card kpi-purple"><div class="kpi-label">Brindes Entregues</div><div class="kpi-value" id="kpi-brinde">—</div><div class="kpi-sub">entregas registradas</div></div>
         </div>
         <div class="table-wrap">
           <div class="table-header">
@@ -390,14 +337,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
             </div>
           </div>
           <div class="tscroll">
-            <table>
-              <thead><tr>
-                <th>Indicado</th><th>E-mail Indicado</th>
-                <th>Indicador</th><th>E-mail Indicador</th>
-                <th>Data Indicação</th><th>Data Matrícula</th><th>Status</th>
-              </tr></thead>
-              <tbody id="dash-tbody"></tbody>
-            </table>
+            <table><thead><tr>
+              <th>Indicado</th><th>E-mail</th><th>Indicador</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>Brinde</th>
+            </tr></thead><tbody id="dash-tbody"></tbody></table>
           </div>
           <div class="pagination">
             <span id="dash-page-info">—</span>
@@ -409,427 +351,395 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </div>
       </div>
 
-      <!-- ── BUSCAR INDICADO (admin only) ── -->
+      <!-- BUSCAR INDICADO (admin) -->
       <div class="view" id="view-consulta-indicado">
         <div class="search-box">
           <span class="search-label">Buscar Indicado</span>
           <div class="search-row">
             <input class="search-input" id="si-input" placeholder="Nome ou e-mail do indicado..." oninput="searchIndicado()">
-            <button class="btn-ghost" onclick="clearInput('si-input',searchIndicado)">Limpar</button>
+            <button class="btn btn-ghost" onclick="document.getElementById('si-input').value='';searchIndicado()">Limpar</button>
           </div>
         </div>
         <div class="table-wrap">
-          <div class="table-header">
-            <div><strong>Resultado</strong><div class="table-count" id="si-count">Digite para buscar</div></div>
-          </div>
+          <div class="table-header"><div><strong>Resultado</strong><div class="table-count" id="si-count">Digite para buscar</div></div></div>
           <div class="tscroll">
-            <table>
-              <thead><tr>
-                <th>Indicado</th><th>E-mail</th>
-                <th>Indicador</th><th>E-mail Indicador</th>
-                <th>Data Indicação</th><th>Data Matrícula</th><th>Status</th>
-              </tr></thead>
-              <tbody id="si-tbody">
-                <tr><td colspan="7"><div class="empty"><div class="empty-icon">🔍</div><p>Digite para pesquisar</p></div></td></tr>
-              </tbody>
+            <table><thead><tr>
+              <th>Indicado</th><th>E-mail</th><th>Indicador</th><th>E-mail Indicador</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>Brinde</th>
+            </tr></thead><tbody id="si-tbody">
+              <tr><td colspan="8"><div class="empty"><div class="empty-icon">🔍</div><p>Digite para pesquisar</p></div></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUSCAR GERAL (colaborador) -->
+      <div class="view active" id="view-consulta-geral">
+        <div class="search-box">
+          <span class="search-label">Buscar Indicador ou Indicado</span>
+          <div class="search-row">
+            <input class="search-input" id="geral-input" placeholder="Nome do indicador ou indicado..." oninput="searchGeral()">
+            <button class="btn btn-ghost" onclick="document.getElementById('geral-input').value='';searchGeral()">Limpar</button>
+          </div>
+        </div>
+        <div id="geral-results">
+          <div class="empty"><div class="empty-icon">🔍</div><p>Digite acima para buscar</p></div>
+        </div>
+      </div>
+
+      <!-- ADMIN TOOLS -->
+      <div class="view" id="view-admin-tools">
+        <div class="section-card">
+          <h3>📥 Importar Brindes Entregues (CSV)</h3>
+          <p>Importe um CSV com e-mails de quem já retirou o brinde. O arquivo deve ter uma coluna <strong>email</strong> e opcionalmente <strong>entregador</strong>, <strong>unidade</strong> e <strong>data</strong>.</p>
+          <div class="upload-zone" id="import-zone">
+            <input type="file" accept=".csv" onchange="importCSV(event)">
+            <div style="font-size:28px;margin-bottom:8px">📂</div>
+            <strong style="font-size:13px">Clique ou arraste o CSV aqui</strong>
+            <p>Formato: email, entregador, unidade, data</p>
+          </div>
+          <div id="import-status" style="margin-top:12px;font-size:13px;color:var(--muted)"></div>
+        </div>
+        <div class="section-card">
+          <h3>📤 Exportar Registro de Entregas</h3>
+          <p>Baixe todos os registros de entrega de brindes em formato CSV.</p>
+          <button class="btn btn-primary" onclick="exportEntregas()">⬇️ Exportar CSV</button>
+        </div>
+        <div class="section-card">
+          <h3>📋 Entregas Registradas</h3>
+          <p id="entregas-count-admin" style="margin-bottom:12px">—</p>
+          <div class="tscroll">
+            <table id="entregas-table">
+              <thead><tr><th>Beneficiário</th><th>Tipo</th><th>Entregador</th><th>Unidade</th><th>Data</th><th>Ação</th></tr></thead>
+              <tbody id="entregas-tbody"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- ── BUSCAR INDICADOR (todos) ── -->
-      <div class="view active" id="view-consulta-indicador">
-        <div class="search-box">
-          <span class="search-label">Buscar Indicador</span>
-          <div class="search-row">
-            <input class="search-input" id="ind-input" placeholder="Nome do indicador..." oninput="searchIndicador()">
-            <button class="btn-ghost" onclick="clearInput('ind-input',searchIndicador)">Limpar</button>
-          </div>
-        </div>
-        <div id="ind-results">
-          <div class="empty"><div class="empty-icon">👤</div><p>Digite acima para buscar um indicador</p></div>
-        </div>
-      </div>
-
-    </div><!-- /content -->
-  </div><!-- /main -->
-</div><!-- /layout -->
+    </div>
+  </div>
+</div>
 
 <script>
-// ══ CONFIG ════════════════════════════════════════════════════════════════
+// ══ CONFIG ════════════════════════════════════════════
 const SENHAS = {
-  'admin2025':  { role: 'admin',  label: 'Administrador' },
-  'equipe2025': { role: 'colab',  label: 'Colaborador'   }
+  'admin2025': { role:'admin', label:'Administrador' },
+  'equipe2025': { role:'colab', label:'Colaborador' }
 };
-
 const APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKA35A5f3wYUFdggHTCAKlsbYmm_TgHsnDb0ofro9LSqk90Qg6Q7feQRBL_PgzvP-bxQ/exec';
+const STORAGE_KEY = 'indicacoes_entregas_v1';
 
-// ══ STATE ═════════════════════════════════════════════════════════════════
-let SESSION = null;  // { role, label }
-let DATA    = [];    // processed indicações
+// ══ STATE ════════════════════════════════════════════
+let SESSION = null;
+let DATA    = [];   // processed indicações
+let ENTREGAS = {};  // key: email → { nome, tipo[], entregador, unidade, data }
 let dashFilter = 'todos';
 let dashPage   = 1;
 const PG = 30;
 
-// ══ LOGIN ═════════════════════════════════════════════════════════════════
+// Current modal context
+let modalCtx = null; // { indicador_email, indicador_nome, indicado_email, indicado_nome }
+
+// ══ ENTREGAS STORAGE ══════════════════════════════════
+function loadEntregas() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    ENTREGAS = raw ? JSON.parse(raw) : {};
+  } catch { ENTREGAS = {}; }
+}
+function saveEntregas() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(ENTREGAS));
+}
+function getEntregaKey(email) { return (email||'').toLowerCase().trim(); }
+function getEntrega(email) { return ENTREGAS[getEntregaKey(email)] || null; }
+function setEntrega(email, tipo, entregador, unidade) {
+  const key = getEntregaKey(email);
+  if (!ENTREGAS[key]) ENTREGAS[key] = { email: key, tipos: [], entregador, unidade, data: new Date().toISOString() };
+  if (!ENTREGAS[key].tipos.includes(tipo)) ENTREGAS[key].tipos.push(tipo);
+  ENTREGAS[key].entregador = entregador;
+  ENTREGAS[key].unidade = unidade;
+  ENTREGAS[key].data = new Date().toISOString();
+  saveEntregas();
+}
+
+// ══ LOGIN / LOGOUT ════════════════════════════════════
 function doLogin() {
   const pwd = document.getElementById('pwd-input').value.trim();
   const match = SENHAS[pwd];
-  if (!match) {
-    document.getElementById('login-error').textContent = 'Senha incorreta. Tente novamente.';
-    document.getElementById('pwd-input').value = '';
-    return;
-  }
+  if (!match) { document.getElementById('login-error').textContent='Senha incorreta.'; document.getElementById('pwd-input').value=''; return; }
   SESSION = match;
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  loadEntregas();
   setupUI();
   loadData(false);
 }
-
 function doLogout() {
-  SESSION = null;
-  DATA = [];
-  document.getElementById('pwd-input').value = '';
-  document.getElementById('login-error').textContent = '';
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
+  SESSION=null; DATA=[];
+  document.getElementById('pwd-input').value='';
+  document.getElementById('login-error').textContent='';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
 }
 
-// ══ UI SETUP ══════════════════════════════════════════════════════════════
+// ══ UI SETUP ══════════════════════════════════════════
 function setupUI() {
-  const isAdmin = SESSION.role === 'admin';
-
-  // User chip
+  const isAdmin = SESSION.role==='admin';
   const av = document.getElementById('user-avatar');
   av.textContent = SESSION.label[0];
-  av.className   = 'user-avatar ' + SESSION.role;
+  av.className = 'user-avatar ' + SESSION.role;
   document.getElementById('user-name').textContent = SESSION.label;
-  document.getElementById('user-role').textContent = isAdmin ? 'Acesso total' : 'Consulta apenas';
-
-  // Show/hide admin areas
-  document.getElementById('nav-admin').style.display   = isAdmin ? 'block' : 'none';
+  document.getElementById('user-role').textContent = isAdmin ? 'Acesso total' : 'Consulta + Entregas';
+  document.getElementById('nav-admin').style.display = isAdmin ? 'block' : 'none';
   document.getElementById('sync-section').style.display = isAdmin ? 'block' : 'none';
-
-  // Adjust nav section label
-  document.getElementById('nav-section-shared').textContent = isAdmin ? '' : 'Consultas';
-
-  if (isAdmin) {
-    // Default view: dashboard for admin
-    showView('dashboard', document.getElementById('nav-dashboard'));
-  } else {
-    showView('consulta-indicador', document.getElementById('nav-indicador'));
-  }
+  if (isAdmin) { showView('dashboard', document.getElementById('nav-dashboard')); }
+  else { showView('consulta-geral', document.getElementById('nav-busca')); }
 }
 
-// ══ NAVIGATION ════════════════════════════════════════════════════════════
+// ══ NAVIGATION ════════════════════════════════════════
 const VIEW_META = {
-  'dashboard':          ['Dashboard', 'Visão geral do programa de indicações'],
-  'consulta-indicado':  ['Buscar Indicado', 'Verifique o status de qualquer indicado pelo e-mail ou nome'],
-  'consulta-indicador': ['Buscar Indicador', 'Veja todos os indicados de um indicador e o status de cada um'],
+  'dashboard':         ['Dashboard','Visão geral do programa'],
+  'consulta-indicado': ['Buscar Indicado','Pesquise pelo nome ou e-mail do indicado'],
+  'consulta-geral':    ['Buscar Beneficiário','Pesquise por indicador ou indicado'],
+  'admin-tools':       ['Ferramentas Admin','Importação e exportação de dados'],
 };
-
 function showView(v, el) {
   event && event.preventDefault();
-  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
-  document.getElementById('view-' + v).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
-  if (el) el.classList.add('active');
-  const [t, s] = VIEW_META[v] || ['—', ''];
-  document.getElementById('topbar-title').textContent = t;
-  document.getElementById('topbar-sub').textContent   = s;
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const [t,s]=VIEW_META[v]||['—',''];
+  document.getElementById('topbar-title').textContent=t;
+  document.getElementById('topbar-sub').textContent=s;
+  if(v==='admin-tools') renderEntregasAdmin();
 }
 
-// ══ CSV PARSER ════════════════════════════════════════════════════════════
+// ══ CSV PARSER ════════════════════════════════════════
 function parseCSV(text) {
   const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
   const headers = splitLine(lines[0]);
   const rows = [];
-  for (let i = 1; i < lines.length; i++) {
+  for (let i=1;i<lines.length;i++) {
     if (!lines[i].trim()) continue;
     const cols = splitLine(lines[i]);
     const obj = { __cols: cols };
-    headers.forEach((h,idx) => {
-      const key = h in obj ? h + '_' + idx : h;
-      obj[key] = (cols[idx] || '').trim();
-    });
+    headers.forEach((h,idx) => { const k=h in obj?h+'_'+idx:h; obj[k]=(cols[idx]||'').trim(); });
     rows.push(obj);
   }
   return { headers, rows };
 }
-
 function splitLine(line) {
   const r=[]; let c=''; let q=false;
-  for (let i=0;i<line.length;i++) {
-    if (line[i]==='"'){q=!q}
-    else if (line[i]===',' && !q){r.push(c);c=''}
-    else {c+=line[i]}
+  for(let i=0;i<line.length;i++){
+    if(line[i]==='"'){q=!q} else if(line[i]===',' && !q){r.push(c);c=''} else{c+=line[i]}
   }
-  r.push(c);
-  return r;
+  r.push(c); return r;
 }
 
-// ══ DATA PROCESSING ═══════════════════════════════════════════════════════
-// Column map for indicações CSV (position-based):
-// [0] email indicador  [1] Nome indicador  [2] tel  [3] já aluno  [4-5] CPF
-// [6] Nome ind1  [7] Tel ind1  [8] Email ind1
-// [9] Deseja?  [10] Nome ind2  [11] Tel ind2  [12] Email ind2
-// [13] Deseja?  [14] Nome ind3  [15] Tel ind3  [16] Email ind3
-// [17] Deseja?  [18] Nome ind4  [19] Tel ind4  [20] Email ind4
-// [26] email_indicador  [27] Submitted At
-
+// ══ DATA PROCESSING ═══════════════════════════════════
 function processData(matRows, indRows) {
-  // Map email → matrícula
   const matMap = {};
   for (const m of matRows) {
-    const email = (m['Email'] || '').toLowerCase().trim();
+    const email = (m['Email']||'').toLowerCase().trim();
     if (email) matMap[email] = m;
   }
-
   const result = [];
-
   for (const row of indRows) {
-    // Use raw array access via the cols property
     const cols = row.__cols || [];
     if (cols.length < 8) continue;
-
-    const indicador_email = (cols[0] || '').toLowerCase().trim();
-    const indicador_nome  = (cols[1] || '').trim();
-    const submit_date     = (cols[27] || cols[26] || '').trim();
-
-    // Indicado slots: [6,8], [10,12], [14,16], [18,20]
+    const indicador_email = (cols[0]||'').toLowerCase().trim();
+    const indicador_nome  = (cols[1]||'').trim();
+    const submit_date     = (cols[27]||'').trim();
     const slots = [
-      { nome: (cols[6]||'').trim(),  email: (cols[8]||'').toLowerCase().trim()  },
-      { nome: (cols[10]||'').trim(), email: (cols[12]||'').toLowerCase().trim() },
-      { nome: (cols[14]||'').trim(), email: (cols[16]||'').toLowerCase().trim() },
-      { nome: (cols[18]||'').trim(), email: (cols[20]||'').toLowerCase().trim() },
+      { nome:(cols[6]||'').trim(),  email:(cols[8]||'').toLowerCase().trim()  },
+      { nome:(cols[10]||'').trim(), email:(cols[12]||'').toLowerCase().trim() },
+      { nome:(cols[14]||'').trim(), email:(cols[16]||'').toLowerCase().trim() },
+      { nome:(cols[18]||'').trim(), email:(cols[20]||'').toLowerCase().trim() },
     ];
-
     for (const slot of slots) {
       if (!slot.nome && !slot.email) continue;
       const mat = matMap[slot.email];
-      let status, data_mat = '', mat_nome = '';
-
+      let status, data_mat='', mat_nome='';
       if (mat) {
-        data_mat = mat['Data corrigida'] || '';
-        mat_nome = mat['Nome'] || '';
+        data_mat = mat['Data corrigida']||'';
+        mat_nome = mat['Nome']||'';
         try {
-          const dI = new Date(submit_date), dM = new Date(data_mat);
-          status = (!isNaN(dI)&&!isNaN(dM)) ? (dM>dI ? 'Benefício Liberado' : 'Regra de Data Inválida') : 'Benefício Liberado';
-        } catch { status = 'Benefício Liberado'; }
-      } else { status = 'Aguardando Matrícula'; }
-
-      result.push({
-        indicador_nome, indicador_email,
-        indicado_nome: slot.nome, indicado_email: slot.email,
-        data_indicacao: submit_date, data_matricula: data_mat,
-        matriculado_nome: mat_nome, status
-      });
+          const dI=new Date(submit_date), dM=new Date(data_mat);
+          status=(!isNaN(dI)&&!isNaN(dM))?(dM>dI?'Benefício Liberado':'Regra de Data Inválida'):'Benefício Liberado';
+        } catch { status='Benefício Liberado'; }
+      } else { status='Aguardando Matrícula'; }
+      result.push({ indicador_nome, indicador_email, indicado_nome:slot.nome, indicado_email:slot.email, data_indicacao:submit_date, data_matricula:data_mat, matriculado_nome:mat_nome, status });
     }
   }
   return result;
 }
 
-// ══ LOAD DATA ═════════════════════════════════════════════════════════════
+// ══ LOAD DATA ════════════════════════════════════════
 async function loadData(isRefresh) {
-  const overlay = document.getElementById('overlay');
-  const badge   = document.getElementById('status-badge');
-  const syncBtn = document.getElementById('sync-btn');
-
+  const overlay=document.getElementById('overlay');
+  const badge=document.getElementById('status-badge');
+  const syncBtn=document.getElementById('sync-btn');
   overlay.classList.remove('hidden');
-  if (syncBtn) syncBtn.disabled = true;
-  badge.className = 'badge badge-loading';
-  badge.textContent = 'Carregando...';
-
+  if(syncBtn) syncBtn.disabled=true;
+  badge.className='badge badge-loading'; badge.textContent='Carregando...';
   try {
-    setProgress(5, 'Buscando dados do Google Sheets...');
-    const res = await fetch(APPS_SCRIPT + '?t=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    setProgress(5,'Buscando dados...');
+    const res = await fetch(APPS_SCRIPT+'?t='+Date.now());
+    if(!res.ok) throw new Error('HTTP '+res.status);
     const raw = await res.text();
-    // Apps Script pode retornar com BOM ou wrapper - limpar antes de parsear
-    const cleaned = raw.trim().replace(/^\uFEFF/, '');
     let json;
-    try { json = JSON.parse(cleaned); }
-    catch(e) { throw new Error('Resposta inválida do servidor: ' + cleaned.slice(0,100)); }
-    if (!json.mat || !json.ind) throw new Error('Campos mat/ind ausentes na resposta');
-    setProgress(60, 'Processando dados...');
-    const matText = json.mat;
-    const indText = json.ind;
-    setProgress(80, 'Cruzando dados...');
-
-    const { rows: matRows } = parseCSV(matText);
-    const { rows: indRows } = parseCSV(indText);
-    DATA = processData(matRows, indRows);
-
-    setProgress(100, 'Concluído!');
-    updateKPIs();
-    dashPage = 1;
-    renderDashTable();
-
-    const now = new Date().toLocaleString('pt-BR');
-    const syncEl = document.getElementById('sync-time');
-    if (syncEl) syncEl.textContent = now;
-
-    badge.className = 'badge badge-live';
-    badge.textContent = 'Ao vivo';
-    setTimeout(() => { overlay.classList.add('hidden'); if(syncBtn) syncBtn.disabled=false; }, 350);
-
+    try { json=JSON.parse(raw.trim().replace(/^\uFEFF/,'')); } catch(e) { throw new Error('JSON inválido: '+raw.slice(0,80)); }
+    if(!json.mat||!json.ind) throw new Error('Campos ausentes na resposta');
+    setProgress(70,'Processando...');
+    const {rows:matRows}=parseCSV(json.mat);
+    const {rows:indRows}=parseCSV(json.ind);
+    DATA=processData(matRows,indRows);
+    setProgress(100,'Concluído!');
+    updateKPIs(); dashPage=1; renderDashTable();
+    const now=new Date().toLocaleString('pt-BR');
+    const st=document.getElementById('sync-time'); if(st) st.textContent=now;
+    badge.className='badge badge-live'; badge.textContent='Ao vivo';
+    setTimeout(()=>{ overlay.classList.add('hidden'); if(syncBtn) syncBtn.disabled=false; },350);
   } catch(err) {
-    badge.className = 'badge badge-error';
-    badge.textContent = 'Erro';
-    overlay.innerHTML = `<div class="overlay-card">
-      <div class="overlay-icon">⚠️</div>
-      <div class="overlay-title">Erro ao carregar</div>
-      <div class="overlay-sub" style="margin-bottom:20px">${err.message}</div>
-      <button class="btn-ghost" onclick="loadData(false)">Tentar novamente</button>
+    badge.className='badge badge-error'; badge.textContent='Erro';
+    overlay.innerHTML=`<div class="overlay-card"><div class="overlay-icon">⚠️</div><div class="overlay-title">Erro ao carregar</div><div class="overlay-sub" style="margin-bottom:20px">${err.message}</div><button class="btn btn-ghost" onclick="loadData(false)">Tentar novamente</button></div>`;
+    if(syncBtn) syncBtn.disabled=false;
+  }
+}
+function setProgress(pct,msg){document.getElementById('prog-fill').style.width=pct+'%';document.getElementById('prog-step').textContent=msg;}
+
+// ══ HELPERS ═══════════════════════════════════════════
+function pill(s){const m={'Benefício Liberado':'pill-lib','Aguardando Matrícula':'pill-agu','Regra de Data Inválida':'pill-inv'};return `<span class="pill ${m[s]||''}">${s}</span>`;}
+function fmtDate(d){if(!d)return '<span style="color:var(--muted)">—</span>';try{return new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}catch{return d;}}
+function cap(s){if(!s)return '—';return s.split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1).toLowerCase():'').join(' ');}
+
+function brindePill(email, nome) {
+  const e = getEntrega(email);
+  if (e) {
+    return `<div>
+      <span class="brinde-entregue">🎁 Entregue</span>
+      <div class="entrega-info">Por <strong>${cap(e.entregador)}</strong> · ${cap(e.unidade)}<br>${fmtDate(e.data)}</div>
     </div>`;
-    if(syncBtn) syncBtn.disabled = false;
   }
+  return `<span class="brinde-pendente">⏳ Pendente</span>`;
 }
 
-function setProgress(pct, msg) {
-  document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-step').textContent = msg;
+function btnEntrega(indicador_nome, indicador_email, indicado_nome, indicado_email, status) {
+  if (status !== 'Benefício Liberado') return '';
+  return `<button class="btn btn-sm btn-primary" onclick="abrirModal('${esc(indicador_nome)}','${esc(indicador_email)}','${esc(indicado_nome)}','${esc(indicado_email)}')">🎁 Marcar Entrega</button>`;
+}
+function esc(s){ return (s||'').replace(/'/g,"\\'"); }
+
+// ══ KPIs ═════════════════════════════════════════════
+function updateKPIs(){
+  document.getElementById('kpi-total').textContent=DATA.length;
+  document.getElementById('kpi-lib').textContent=DATA.filter(r=>r.status==='Benefício Liberado').length;
+  document.getElementById('kpi-agu').textContent=DATA.filter(r=>r.status==='Aguardando Matrícula').length;
+  document.getElementById('kpi-brinde').textContent=Object.keys(ENTREGAS).length;
 }
 
-// ══ HELPERS ═══════════════════════════════════════════════════════════════
-function pill(s) {
-  const map = {'Benefício Liberado':'pill-lib','Aguardando Matrícula':'pill-agu','Regra de Data Inválida':'pill-inv'};
-  return `<span class="pill ${map[s]||''}">${s}</span>`;
-}
-function fmtDate(d) {
-  if (!d) return '<span style="color:var(--muted)">—</span>';
-  try { return new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}); } catch { return d; }
-}
-function cap(s) {
-  if (!s) return '—';
-  return s.split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1).toLowerCase():'').join(' ');
-}
-function clearInput(id, fn) { document.getElementById(id).value=''; fn(); }
-
-// ══ KPIs ══════════════════════════════════════════════════════════════════
-function updateKPIs() {
-  document.getElementById('kpi-total').textContent = DATA.length;
-  document.getElementById('kpi-lib').textContent   = DATA.filter(r=>r.status==='Benefício Liberado').length;
-  document.getElementById('kpi-agu').textContent   = DATA.filter(r=>r.status==='Aguardando Matrícula').length;
-  document.getElementById('kpi-inv').textContent   = DATA.filter(r=>r.status==='Regra de Data Inválida').length;
-}
-
-// ══ DASHBOARD TABLE ════════════════════════════════════════════════════════
-function filterDash(f, btn) {
-  dashFilter = f; dashPage = 1;
-  document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderDashTable();
-}
-function getFiltered() { return dashFilter==='todos' ? DATA : DATA.filter(r=>r.status===dashFilter); }
-function renderDashTable() {
-  const data  = getFiltered();
-  const total = data.length;
-  const pages = Math.ceil(total/PG)||1;
-  dashPage = Math.max(1,Math.min(dashPage,pages));
-  const slice = data.slice((dashPage-1)*PG, dashPage*PG);
-
-  document.getElementById('dash-count').textContent = `${total} registro${total!==1?'s':''}`;
-  document.getElementById('dash-page-info').textContent = `Página ${dashPage} de ${pages}`;
-  document.getElementById('dash-prev').disabled = dashPage<=1;
-  document.getElementById('dash-next').disabled = dashPage>=pages;
-
-  const tbody = document.getElementById('dash-tbody');
-  if (!slice.length) { tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">📭</div><p>Nenhum registro</p></div></td></tr>'; return; }
-  tbody.innerHTML = slice.map(r=>`<tr>
+// ══ DASHBOARD ════════════════════════════════════════
+function filterDash(f,btn){dashFilter=f;dashPage=1;document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderDashTable();}
+function getFiltered(){return dashFilter==='todos'?DATA:DATA.filter(r=>r.status===dashFilter);}
+function renderDashTable(){
+  const data=getFiltered();const total=data.length;const pages=Math.ceil(total/PG)||1;
+  dashPage=Math.max(1,Math.min(dashPage,pages));
+  const slice=data.slice((dashPage-1)*PG,dashPage*PG);
+  document.getElementById('dash-count').textContent=`${total} registro${total!==1?'s':''}`;
+  document.getElementById('dash-page-info').textContent=`Página ${dashPage} de ${pages}`;
+  document.getElementById('dash-prev').disabled=dashPage<=1;
+  document.getElementById('dash-next').disabled=dashPage>=pages;
+  const tbody=document.getElementById('dash-tbody');
+  if(!slice.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">📭</div><p>Nenhum registro</p></div></td></tr>';return;}
+  tbody.innerHTML=slice.map(r=>`<tr>
     <td class="tn">${cap(r.indicado_nome)}</td>
     <td class="te">${r.indicado_email||'—'}</td>
     <td class="tn">${cap(r.indicador_nome)}</td>
-    <td class="te">${r.indicador_email||'—'}</td>
     <td class="td">${fmtDate(r.data_indicacao)}</td>
     <td class="td">${fmtDate(r.data_matricula)}</td>
     <td>${pill(r.status)}</td>
+    <td>${r.status==='Benefício Liberado'?brindePill(r.indicado_email,r.indicado_nome):'—'}</td>
   </tr>`).join('');
 }
-function pageChange(dir) { dashPage+=dir; renderDashTable(); }
+function pageChange(dir){dashPage+=dir;renderDashTable();}
 
-// ══ SEARCH INDICADO (admin) ════════════════════════════════════════════════
-function searchIndicado() {
-  const q = document.getElementById('si-input').value.trim().toLowerCase();
-  const tbody = document.getElementById('si-tbody');
-  const countEl = document.getElementById('si-count');
-  if (q.length<2) {
-    tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🔍</div><p>Digite ao menos 2 caracteres</p></div></td></tr>';
-    countEl.textContent='Digite para buscar'; return;
-  }
-  const res = DATA.filter(r=>(r.indicado_nome||'').toLowerCase().includes(q)||(r.indicado_email||'').toLowerCase().includes(q));
-  countEl.textContent = `${res.length} resultado${res.length!==1?'s':''}`;
-  if (!res.length) { tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">😶</div><p>Nenhum indicado encontrado</p></div></td></tr>'; return; }
-  tbody.innerHTML = res.slice(0,150).map(r=>`<tr>
-    <td class="tn">${cap(r.indicado_nome)}</td>
-    <td class="te">${r.indicado_email||'—'}</td>
-    <td class="tn">${cap(r.indicador_nome)}</td>
-    <td class="te">${r.indicador_email||'—'}</td>
-    <td class="td">${fmtDate(r.data_indicacao)}</td>
-    <td class="td">${fmtDate(r.data_matricula)}</td>
+// ══ SEARCH INDICADO (admin) ═══════════════════════════
+function searchIndicado(){
+  const q=document.getElementById('si-input').value.trim().toLowerCase();
+  const tbody=document.getElementById('si-tbody');
+  const countEl=document.getElementById('si-count');
+  if(q.length<2){tbody.innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-icon">🔍</div><p>Digite ao menos 2 caracteres</p></div></td></tr>';countEl.textContent='Digite para buscar';return;}
+  const res=DATA.filter(r=>(r.indicado_nome||'').toLowerCase().includes(q)||(r.indicado_email||'').toLowerCase().includes(q));
+  countEl.textContent=`${res.length} resultado${res.length!==1?'s':''}`;
+  if(!res.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-icon">😶</div><p>Nenhum resultado</p></div></td></tr>';return;}
+  tbody.innerHTML=res.slice(0,150).map(r=>`<tr>
+    <td class="tn">${cap(r.indicado_nome)}</td><td class="te">${r.indicado_email||'—'}</td>
+    <td class="tn">${cap(r.indicador_nome)}</td><td class="te">${r.indicador_email||'—'}</td>
+    <td class="td">${fmtDate(r.data_indicacao)}</td><td class="td">${fmtDate(r.data_matricula)}</td>
     <td>${pill(r.status)}</td>
+    <td>${r.status==='Benefício Liberado'?brindePill(r.indicado_email,r.indicado_nome)+'<br>'+btnEntrega(r.indicador_nome,r.indicador_email,r.indicado_nome,r.indicado_email,r.status):'—'}</td>
   </tr>`).join('');
 }
 
-// ══ SEARCH INDICADOR ══════════════════════════════════════════════════════
-function searchIndicador() {
-  const q = document.getElementById('ind-input').value.trim().toLowerCase();
-  const container = document.getElementById('ind-results');
-  const isAdmin = SESSION && SESSION.role === 'admin';
+// ══ SEARCH GERAL (colaborador + admin) ════════════════
+function searchGeral(){
+  const q=document.getElementById('geral-input').value.trim().toLowerCase();
+  const container=document.getElementById('geral-results');
+  if(q.length<2){container.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><p>Digite ao menos 2 caracteres</p></div>';return;}
+  const isAdmin=SESSION&&SESSION.role==='admin';
 
-  if (q.length < 2) {
-    container.innerHTML='<div class="empty"><div class="empty-icon">👤</div><p>Digite ao menos 2 caracteres</p></div>'; return;
-  }
-
-  // Group by indicador
-  const map = {};
-  DATA.forEach(r => {
-    const key = r.indicador_email || r.indicador_nome;
-    if (!key) return;
-    const matchNome  = (r.indicador_nome||'').toLowerCase().includes(q);
-    const matchEmail = (r.indicador_email||'').toLowerCase().includes(q);
-    if (matchNome || matchEmail) {
-      if (!map[key]) map[key] = { nome: r.indicador_nome, email: r.indicador_email, list: [] };
-      map[key].list.push(r);
-    }
+  // Group by indicador, filtering where indicador OR any indicado matches
+  const map={};
+  DATA.forEach(r=>{
+    const matchInd   = (r.indicador_nome||'').toLowerCase().includes(q)||(r.indicador_email||'').toLowerCase().includes(q);
+    const matchInddo = (r.indicado_nome||'').toLowerCase().includes(q)||(r.indicado_email||'').toLowerCase().includes(q);
+    if(!matchInd&&!matchInddo) return;
+    const key=r.indicador_email||r.indicador_nome;
+    if(!map[key]) map[key]={nome:r.indicador_nome,email:r.indicador_email,list:[],matchedInddo:[]};
+    map[key].list.push(r);
+    if(matchInddo) map[key].matchedInddo.push(r.indicado_email);
   });
 
-  const keys = Object.keys(map);
-  if (!keys.length) { container.innerHTML='<div class="empty"><div class="empty-icon">😶</div><p>Nenhum indicador encontrado</p></div>'; return; }
+  const keys=Object.keys(map);
+  if(!keys.length){container.innerHTML='<div class="empty"><div class="empty-icon">😶</div><p>Nenhum resultado encontrado</p></div>';return;}
 
-  container.innerHTML = keys.slice(0,50).map((k,i) => {
-    const g = map[k];
-    const lib = g.list.filter(x=>x.status==='Benefício Liberado').length;
-    const agu = g.list.filter(x=>x.status==='Aguardando Matrícula').length;
-    const inv = g.list.filter(x=>x.status==='Regra de Data Inválida').length;
+  container.innerHTML=keys.slice(0,50).map((k,i)=>{
+    const g=map[k];
+    const lib=g.list.filter(x=>x.status==='Benefício Liberado').length;
+    const agu=g.list.filter(x=>x.status==='Aguardando Matrícula').length;
+    const inv=g.list.filter(x=>x.status==='Regra de Data Inválida').length;
+    const entregaInd=getEntrega(g.email);
 
-    // Rows — colaborador sees no e-mails, no dates
-    const rows = g.list.map(r => isAdmin
-      ? `<tr>
-          <td class="tn no-copy">${cap(r.indicado_nome)}</td>
-          <td class="te no-copy">${r.indicado_email||'—'}</td>
-          <td class="td">${fmtDate(r.data_indicacao)}</td>
-          <td class="td">${fmtDate(r.data_matricula)}</td>
-          <td>${pill(r.status)}</td>
-         </tr>`
-      : `<tr>
-          <td class="tn no-copy">${cap(r.indicado_nome)}</td>
-          <td>${pill(r.status)}</td>
-         </tr>`
-    ).join('');
+    // Indicador brinde row
+    const indBrinde = entregaInd
+      ? `<div class="brinde-entregue">🎁 Brinde entregue ao Indicador</div><div class="entrega-info">Por <strong>${cap(entregaInd.entregador)}</strong> · ${cap(entregaInd.unidade)} · ${fmtDate(entregaInd.data)}</div>`
+      : (lib>0 ? `<button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="abrirModal('${esc(g.nome)}','${esc(g.email)}','','')">🎁 Marcar entrega ao Indicador</button>` : '');
 
-    const thead = isAdmin
-      ? `<tr><th>Indicado</th><th>E-mail</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th></tr>`
-      : `<tr><th>Indicado</th><th>Status</th></tr>`;
+    const rows=g.list.map(r=>{
+      const entregaInddo=getEntrega(r.indicado_email);
+      const highlight=g.matchedInddo.includes(r.indicado_email)?'background:rgba(79,142,247,0.05);':'';
+      const brindeTd = r.status==='Benefício Liberado'
+        ? `<td>${entregaInddo
+            ? `<div><span class="brinde-entregue">🎁 Entregue</span><div class="entrega-info">Por <strong>${cap(entregaInddo.entregador)}</strong> · ${cap(entregaInddo.unidade)}<br>${fmtDate(entregaInddo.data)}</div></div>`
+            : `<div><span class="brinde-pendente">⏳ Pendente</span><br><button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="abrirModal('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}')">🎁 Marcar Entrega</button></div>`
+          }</td>`
+        : '<td>—</td>';
+      return `<tr style="${highlight}">
+        <td class="tn no-copy">${cap(r.indicado_nome)}</td>
+        <td class="td">${fmtDate(r.data_indicacao)}</td>
+        <td class="td">${fmtDate(r.data_matricula)}</td>
+        <td>${pill(r.status)}</td>
+        ${brindeTd}
+      </tr>`;
+    }).join('');
 
-    const colSpan = isAdmin ? 5 : 2;
-
-    return `<div class="ind-card" id="ic${i}">
-      <div class="ind-header" onclick="toggleCard('ic${i}')">
+    return `<div class="ind-card" id="gc${i}">
+      <div class="ind-header" onclick="toggleCard('gc${i}')">
         <div class="ind-info">
           <h4 class="no-copy">${cap(g.nome)}</h4>
-          ${isAdmin ? `<p class="no-copy">${g.email||'—'}</p>` : ''}
+          ${isAdmin?`<p class="no-copy">${g.email||'—'}</p>`:''}
+          <div style="margin-top:6px">${indBrinde}</div>
         </div>
         <div class="ind-meta">
           <div class="minibadges">
@@ -843,24 +753,158 @@ function searchIndicador() {
       </div>
       <div class="ind-body">
         <div class="tscroll">
-          <table><thead>${thead}</thead><tbody>${rows}</tbody></table>
+          <table><thead><tr><th>Indicado</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>Brinde Indicado</th></tr></thead>
+          <tbody>${rows}</tbody></table>
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-function toggleCard(id) { document.getElementById(id).classList.toggle('open'); }
+function toggleCard(id){document.getElementById(id).classList.toggle('open');}
 
-// ══ SECURITY: disable right-click & shortcuts on colab ════════════════════
-document.addEventListener('contextmenu', e => {
-  if (SESSION && SESSION.role === 'colab') e.preventDefault();
-});
-document.addEventListener('keydown', e => {
-  if (SESSION && SESSION.role === 'colab') {
-    if ((e.ctrlKey||e.metaKey) && ['s','p','u'].includes(e.key.toLowerCase())) e.preventDefault();
+// ══ MODAL ENTREGA ════════════════════════════════════
+function abrirModal(indicador_nome, indicador_email, indicado_nome, indicado_email) {
+  modalCtx = { indicador_nome, indicador_email, indicado_nome, indicado_email };
+  
+  // Build info text
+  let info = '';
+  if (indicador_nome || indicador_email) info += `<strong>Indicador:</strong> ${cap(indicador_nome)}<br>`;
+  if (indicado_nome || indicado_email) info += `<strong>Indicado:</strong> ${cap(indicado_nome)}<br>`;
+  document.getElementById('modal-beneficiario-info').innerHTML = info || '—';
+
+  // Build checkboxes
+  const boxes = [];
+  if (indicador_email) boxes.push({ label: `Indicador — ${cap(indicador_nome)}`, email: indicador_email, key: 'indicador' });
+  if (indicado_email)  boxes.push({ label: `Indicado — ${cap(indicado_nome)}`,   email: indicado_email,  key: 'indicado' });
+  
+  document.getElementById('modal-checkboxes').innerHTML = boxes.map(b => `
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
+      <input type="checkbox" id="chk-${b.key}" value="${b.email}" checked style="accent-color:var(--accent);width:15px;height:15px">
+      ${b.label}
+    </label>
+  `).join('');
+
+  document.getElementById('modal-entregador-nome').value = '';
+  document.getElementById('modal-entregador-unidade').value = '';
+  document.getElementById('modal-error').textContent = '';
+  document.getElementById('modal-entrega').classList.remove('hidden');
+}
+
+function fecharModal() {
+  document.getElementById('modal-entrega').classList.add('hidden');
+  modalCtx = null;
+}
+
+function confirmarEntrega() {
+  const entregador = document.getElementById('modal-entregador-nome').value.trim();
+  const unidade    = document.getElementById('modal-entregador-unidade').value.trim();
+  const errEl      = document.getElementById('modal-error');
+
+  if (!entregador) { errEl.textContent = 'Informe o nome de quem entregou.'; return; }
+  if (!unidade)    { errEl.textContent = 'Informe a unidade.'; return; }
+
+  // Check which checkboxes are selected
+  const selected = [];
+  const chkInd  = document.getElementById('chk-indicador');
+  const chkInddo = document.getElementById('chk-indicado');
+  if (chkInd  && chkInd.checked)  selected.push({ email: chkInd.value,  tipo: 'indicador', nome: modalCtx.indicador_nome });
+  if (chkInddo && chkInddo.checked) selected.push({ email: chkInddo.value, tipo: 'indicado',  nome: modalCtx.indicado_nome });
+
+  if (!selected.length) { errEl.textContent = 'Selecione ao menos um beneficiário.'; return; }
+
+  for (const s of selected) {
+    setEntrega(s.email, s.tipo, entregador, unidade);
   }
-});
+
+  fecharModal();
+  updateKPIs();
+  // Refresh current view
+  const activeView = document.querySelector('.view.active');
+  if (activeView && activeView.id === 'view-consulta-geral') searchGeral();
+  if (activeView && activeView.id === 'view-consulta-indicado') searchIndicado();
+  if (activeView && activeView.id === 'view-dashboard') renderDashTable();
+  if (activeView && activeView.id === 'view-admin-tools') renderEntregasAdmin();
+}
+
+// ══ ADMIN TOOLS ══════════════════════════════════════
+function renderEntregasAdmin() {
+  const keys = Object.keys(ENTREGAS);
+  document.getElementById('entregas-count-admin').textContent = `${keys.length} entrega${keys.length!==1?'s':''} registrada${keys.length!==1?'s':''}`;
+  const tbody = document.getElementById('entregas-tbody');
+  if (!keys.length) { tbody.innerHTML='<tr><td colspan="6"><div class="empty" style="padding:24px"><div class="empty-icon">📭</div><p>Nenhuma entrega registrada</p></div></td></tr>'; return; }
+  tbody.innerHTML = keys.map(k => {
+    const e = ENTREGAS[k];
+    return `<tr>
+      <td class="tn">${k}</td>
+      <td>${(e.tipos||[]).join(', ')}</td>
+      <td>${cap(e.entregador)}</td>
+      <td>${cap(e.unidade)}</td>
+      <td class="td">${fmtDate(e.data)}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="removerEntrega('${k}')">Remover</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function removerEntrega(email) {
+  if (!confirm(`Remover registro de entrega para ${email}?`)) return;
+  delete ENTREGAS[getEntregaKey(email)];
+  saveEntregas();
+  updateKPIs();
+  renderEntregasAdmin();
+}
+
+function exportEntregas() {
+  const keys = Object.keys(ENTREGAS);
+  if (!keys.length) { alert('Nenhuma entrega para exportar.'); return; }
+  const lines = ['email,tipos,entregador,unidade,data'];
+  keys.forEach(k => {
+    const e = ENTREGAS[k];
+    lines.push(`"${k}","${(e.tipos||[]).join('|')}","${e.entregador||''}","${e.unidade||''}","${e.data||''}"`);
+  });
+  const blob = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='entregas_brindes.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('import-status');
+  statusEl.textContent = '⏳ Processando...';
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const { rows } = parseCSV(e.target.result);
+      let count = 0;
+      for (const row of rows) {
+        const email = (row['email']||row['Email']||row['e-mail']||'').toLowerCase().trim();
+        if (!email) continue;
+        const entregador = row['entregador']||row['Entregador']||'Importado';
+        const unidade    = row['unidade']||row['Unidade']||'—';
+        const data       = row['data']||row['Data']||new Date().toISOString();
+        if (!ENTREGAS[email]) {
+          ENTREGAS[email] = { email, tipos:['importado'], entregador, unidade, data };
+          count++;
+        }
+      }
+      saveEntregas();
+      updateKPIs();
+      renderEntregasAdmin();
+      statusEl.textContent = `✅ ${count} novos registros importados.`;
+      statusEl.style.color = 'var(--green)';
+    } catch(err) {
+      statusEl.textContent = '❌ Erro ao ler arquivo: ' + err.message;
+      statusEl.style.color = 'var(--red)';
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ══ SECURITY ════════════════════════════════════════
+document.addEventListener('contextmenu', e=>{ if(SESSION&&SESSION.role==='colab') e.preventDefault(); });
+document.addEventListener('keydown', e=>{ if(SESSION&&SESSION.role==='colab'&&(e.ctrlKey||e.metaKey)&&['s','p','u'].includes(e.key.toLowerCase())) e.preventDefault(); });
 </script>
 </body>
 </html>
