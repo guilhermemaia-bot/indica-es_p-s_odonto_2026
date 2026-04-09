@@ -548,7 +548,7 @@ function parseCSV(text) {
   for (let i = 1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
     const cols = splitLine(lines[i]);
-    const obj = {};
+    const obj = { __cols: cols };
     headers.forEach((h,idx) => {
       const key = h in obj ? h + '_' + idx : h;
       obj[key] = (cols[idx] || '').trim();
@@ -570,6 +570,14 @@ function splitLine(line) {
 }
 
 // ══ DATA PROCESSING ═══════════════════════════════════════════════════════
+// Column map for indicações CSV (position-based):
+// [0] email indicador  [1] Nome indicador  [2] tel  [3] já aluno  [4-5] CPF
+// [6] Nome ind1  [7] Tel ind1  [8] Email ind1
+// [9] Deseja?  [10] Nome ind2  [11] Tel ind2  [12] Email ind2
+// [13] Deseja?  [14] Nome ind3  [15] Tel ind3  [16] Email ind3
+// [17] Deseja?  [18] Nome ind4  [19] Tel ind4  [20] Email ind4
+// [26] email_indicador  [27] Submitted At
+
 function processData(matRows, indRows) {
   // Map email → matrícula
   const matMap = {};
@@ -579,22 +587,23 @@ function processData(matRows, indRows) {
   }
 
   const result = [];
-  for (const row of indRows) {
-    const indicador_nome  = (row['Nome'] || '').trim();
-    const indicador_email = (row['*Vamos iniciar!* Digite abaixo seu melhor e-mail.'] || row['email_indicador'] || '').toLowerCase().trim();
-    const submit_date     = row['Submit Date (UTC)'] || '';
 
-    // Collect all indicado slots (up to 3)
-    // Duplicate col names get suffixed with _idx by parser
-    const slots = [];
-    const fnKeys = Object.keys(row).filter(k => k === 'First name' || k.startsWith('First name_'));
-    const emKeys = Object.keys(row).filter(k => k === 'Email' || k.startsWith('Email_'));
-    const maxS = Math.max(fnKeys.length, emKeys.length);
-    for (let s = 0; s < maxS; s++) {
-      const nome  = (row[fnKeys[s]] || '').trim();
-      const email = (row[emKeys[s]] || '').toLowerCase().trim();
-      if (nome || email) slots.push({ nome, email });
-    }
+  for (const row of indRows) {
+    // Use raw array access via the cols property
+    const cols = row.__cols || [];
+    if (cols.length < 8) continue;
+
+    const indicador_email = (cols[0] || '').toLowerCase().trim();
+    const indicador_nome  = (cols[1] || '').trim();
+    const submit_date     = (cols[27] || cols[26] || '').trim();
+
+    // Indicado slots: [6,8], [10,12], [14,16], [18,20]
+    const slots = [
+      { nome: (cols[6]||'').trim(),  email: (cols[8]||'').toLowerCase().trim()  },
+      { nome: (cols[10]||'').trim(), email: (cols[12]||'').toLowerCase().trim() },
+      { nome: (cols[14]||'').trim(), email: (cols[16]||'').toLowerCase().trim() },
+      { nome: (cols[18]||'').trim(), email: (cols[20]||'').toLowerCase().trim() },
+    ];
 
     for (const slot of slots) {
       if (!slot.nome && !slot.email) continue;
@@ -602,7 +611,7 @@ function processData(matRows, indRows) {
       let status, data_mat = '', mat_nome = '';
 
       if (mat) {
-        data_mat = mat['Data corrigida'] || mat['data_matricula'] || '';
+        data_mat = mat['Data corrigida'] || '';
         mat_nome = mat['Nome'] || '';
         try {
           const dI = new Date(submit_date), dM = new Date(data_mat);
@@ -839,7 +848,7 @@ function searchIndicador() {
       </div>
     </div>`;
   }).join('');
-} 
+}
 
 function toggleCard(id) { document.getElementById(id).classList.toggle('open'); }
 
