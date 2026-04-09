@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programa de Indicações</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#141720;--surface2:#1c2030;--surface3:#222840;
+  --border:#252a3a;--border2:#2e3549;
+  --text:#e8eaf0;--muted:#7a83a0;--muted2:#4a5270;
+  --accent:#4f8ef7;--accent-dim:rgba(79,142,247,0.12);--accent-glow:rgba(79,142,247,0.25);
+  --green:#34d48a;--green-dim:rgba(52,212,138,0.10);
+  --yellow:#f5a623;--yellow-dim:rgba(245,166,35,0.10);
+  --red:#f05252;--red-dim:rgba(240,82,82,0.10);
+  --r:10px;--r-sm:6px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{text-decoration:none}
+button{cursor:pointer;font-family:'DM Sans',sans-serif}
+
+/* ── LOGIN ─────────────────────────────────────────── */
+#login-screen{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);z-index:200;
+  background-image:radial-gradient(ellipse at 60% 20%,rgba(79,142,247,0.07) 0%,transparent 60%),
+                   radial-gradient(ellipse at 20% 80%,rgba(52,212,138,0.05) 0%,transparent 50%);
+}
+.login-card{
+  width:380px;background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:40px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.03);
+}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.login-logo-icon{
+  width:44px;height:44px;background:var(--accent);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  box-shadow:0 0 20px var(--accent-glow);
+}
+.login-logo h1{font-size:16px;font-weight:600;line-height:1.3}
+.login-logo p{font-size:12px;color:var(--muted);margin-top:2px}
+.login-label{font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.04em}
+.login-input{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:14px;padding:11px 14px;outline:none;transition:border .15s;margin-bottom:16px;
+}
+.login-input:focus{border-color:var(--accent)}
+.login-btn{
+  width:100%;padding:12px;background:var(--accent);color:#fff;border:none;
+  border-radius:var(--r-sm);font-size:14px;font-weight:600;
+  transition:all .15s;letter-spacing:.01em;
+}
+.login-btn:hover{background:#3a7de8;box-shadow:0 4px 20px var(--accent-glow)}
+.login-error{font-size:12px;color:var(--red);margin-top:10px;min-height:18px;text-align:center}
+.login-divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+.login-hint{font-size:11px;color:var(--muted2);text-align:center;line-height:1.6}
+
+/* ── LAYOUT ────────────────────────────────────────── */
+.layout{display:flex;min-height:100vh}
+.sidebar{
+  width:230px;min-height:100vh;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  padding:24px 0;position:fixed;top:0;left:0;bottom:0;z-index:10;
+  transition:transform .3s;
+}
+.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.logo-icon{
+  width:36px;height:36px;background:var(--accent);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:8px;
+}
+.logo h2{font-size:13px;font-weight:600;line-height:1.3}
+.logo p{font-size:11px;color:var(--muted);margin-top:2px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:10px 20px;
+  font-size:13px;font-weight:500;color:var(--muted);
+  border-left:3px solid transparent;transition:all .15s;
+}
+.nav-item:hover{color:var(--text);background:var(--surface2)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim)}
+.nav-icon{font-size:16px}
+.nav-section{padding:6px 20px 4px;font-size:10px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:8px}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
+.user-chip{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;
+  background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border);
+  margin-bottom:10px;
+}
+.user-avatar{
+  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;
+}
+.user-avatar.admin{background:rgba(79,142,247,0.2);color:var(--accent)}
+.user-avatar.colab{background:rgba(52,212,138,0.2);color:var(--green)}
+.user-name{font-size:12px;font-weight:500;flex:1}
+.user-role{font-size:10px;color:var(--muted);margin-top:1px}
+.logout-btn{
+  width:100%;padding:7px;background:transparent;border:1px solid var(--border);
+  border-radius:var(--r-sm);font-size:12px;color:var(--muted);transition:all .15s;
+}
+.logout-btn:hover{color:var(--red);border-color:rgba(240,82,82,0.3)}
+.sync-info{font-size:11px;color:var(--muted2);margin-bottom:8px;line-height:1.5}
+.sync-info span{color:var(--muted)}
+.sync-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:7px;background:var(--accent-dim);border:1px solid rgba(79,142,247,0.2);
+  border-radius:var(--r-sm);font-size:12px;color:var(--accent);font-weight:500;
+  transition:all .15s;margin-bottom:10px;
+}
+.sync-btn:hover{background:var(--accent-glow)}
+.sync-btn:disabled{opacity:.4;cursor:not-allowed}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinning{display:inline-block;animation:spin .8s linear infinite}
+
+/* ── MAIN ──────────────────────────────────────────── */
+.main{margin-left:230px;flex:1;display:flex;flex-direction:column}
+.topbar{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:14px 28px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:5;
+}
+.topbar-title{font-size:15px;font-weight:600}
+.topbar-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.badge{
+  display:flex;align-items:center;gap:6px;font-size:11px;
+  padding:4px 10px;border-radius:20px;
+}
+.badge-live{color:var(--green);background:var(--green-dim);border:1px solid rgba(52,212,138,0.2)}
+.badge-loading{color:var(--yellow);background:var(--yellow-dim);border:1px solid rgba(245,166,35,0.2)}
+.badge-error{color:var(--red);background:var(--red-dim);border:1px solid rgba(240,82,82,0.2)}
+.badge-live::before,.badge-loading::before,.badge-error::before{content:'●';font-size:8px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.badge-live::before{animation:pulse 1.5s infinite}
+.content{padding:28px}
+.view{display:none}
+.view.active{display:block}
+
+/* ── LOADING OVERLAY ───────────────────────────────── */
+.overlay{
+  position:fixed;inset:0;background:rgba(13,15,20,.88);
+  display:flex;align-items:center;justify-content:center;
+  z-index:150;backdrop-filter:blur(4px);
+}
+.overlay.hidden{display:none}
+.overlay-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:36px 48px;text-align:center;min-width:300px;
+}
+.overlay-icon{font-size:36px;margin-bottom:14px}
+.overlay-title{font-size:15px;font-weight:600;margin-bottom:6px}
+.overlay-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.prog-bar{width:240px;height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin:0 auto}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
+.prog-step{font-size:12px;color:var(--muted);margin-top:10px;min-height:18px}
+
+/* ── KPI GRID ──────────────────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.kpi-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px;position:relative;overflow:hidden;
+}
+.kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi-blue::after{background:var(--accent)}.kpi-green::after{background:var(--green)}
+.kpi-yellow::after{background:var(--yellow)}.kpi-red::after{background:var(--red)}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.kpi-value{font-size:32px;font-weight:300;margin:6px 0 4px;font-family:'DM Mono',monospace}
+.kpi-blue .kpi-value{color:var(--accent)}.kpi-green .kpi-value{color:var(--green)}
+.kpi-yellow .kpi-value{color:var(--yellow)}.kpi-red .kpi-value{color:var(--red)}
+.kpi-sub{font-size:11px;color:var(--muted)}
+
+/* ── TABLE ─────────────────────────────────────────── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.table-header{
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.table-header strong{font-size:13px;font-weight:600}
+.table-count{font-size:11px;color:var(--muted);margin-top:2px}
+.filter-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.filter-tab{
+  padding:5px 12px;border-radius:var(--r-sm);font-size:12px;
+  color:var(--muted);background:transparent;border:1px solid transparent;transition:all .15s;
+}
+.filter-tab:hover{background:var(--surface2);color:var(--text)}
+.filter-tab.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(79,142,247,0.2)}
+.tscroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{
+  text-align:left;padding:10px 16px;font-size:11px;font-weight:600;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.05em;
+  border-bottom:1px solid var(--border);background:rgba(255,255,255,.01);white-space:nowrap;
+}
+td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.tn{font-weight:500}
+.te{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
+.td{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
+
+/* ── STATUS PILLS ──────────────────────────────────── */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.pill::before{content:'●';font-size:8px}
+.pill-lib{background:var(--green-dim);color:var(--green);border:1px solid rgba(52,212,138,0.2)}
+.pill-agu{background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(245,166,35,0.2)}
+.pill-inv{background:var(--red-dim);color:var(--red);border:1px solid rgba(240,82,82,0.2)}
+
+/* ── PAGINATION ────────────────────────────────────── */
+.pagination{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
+.page-btns{display:flex;gap:4px}
+.page-btn{
+  padding:4px 10px;border-radius:var(--r-sm);font-size:12px;
+  background:var(--surface2);border:1px solid var(--border);color:var(--muted);transition:all .15s;
+}
+.page-btn:hover:not(:disabled){background:var(--accent-dim);color:var(--accent);border-color:rgba(79,142,247,0.3)}
+.page-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* ── SEARCH BOX ────────────────────────────────────── */
+.search-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:20px}
+.search-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:block}
+.search-row{display:flex;gap:10px}
+.search-input{
+  flex:1;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:14px;padding:10px 14px;outline:none;transition:border .15s;
+}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--muted)}
+.btn-ghost{
+  padding:10px 16px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r-sm);font-size:13px;color:var(--muted);transition:all .15s;
+}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
+
+/* ── INDICADOR CARDS ───────────────────────────────── */
+.ind-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.ind-header{
+  padding:16px 20px;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;transition:background .15s;
+}
+.ind-header:hover{background:var(--surface2)}
+.ind-info h4{font-size:14px;font-weight:600}
+.ind-info p{font-size:12px;color:var(--muted);margin-top:2px}
+.ind-meta{display:flex;align-items:center;gap:12px}
+.ind-count{font-size:12px;color:var(--muted)}
+.chevron{color:var(--muted);font-size:11px;transition:transform .2s}
+.ind-card.open .chevron{transform:rotate(180deg)}
+.ind-body{display:none;border-top:1px solid var(--border)}
+.ind-card.open .ind-body{display:block}
+.minibadges{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ── EMPTY ─────────────────────────────────────────── */
+.empty{padding:52px 20px;text-align:center;color:var(--muted)}
+.empty-icon{font-size:36px;margin-bottom:12px}
+.empty p{font-size:13px}
+
+/* ── NO-PRINT / NO-SELECT ──────────────────────────── */
+.no-copy{user-select:none;-webkit-user-select:none}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN SCREEN ══════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">🎓</div>
+      <div>
+        <h1>Programa de<br>Indicações</h1>
+        <p>Backoffice — Acesso restrito</p>
+      </div>
+    </div>
+    <label class="login-label" for="pwd-input">Senha de acesso</label>
+    <input class="login-input" id="pwd-input" type="password" placeholder="Digite sua senha..." onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+    <hr class="login-divider">
+    <p class="login-hint">Acesso exclusivo para colaboradores autorizados.<br>Em caso de dúvidas, contate o administrador.</p>
+  </div>
+</div>
+
+<!-- ══ LOADING OVERLAY ═══════════════════════════════════════════════════ -->
+<div class="overlay hidden" id="overlay">
+  <div class="overlay-card">
+    <div class="overlay-icon">📡</div>
+    <div class="overlay-title">Buscando dados</div>
+    <div class="overlay-sub">Conectando ao Google Sheets...</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-step" id="prog-step">Iniciando...</div>
+  </div>
+</div>
+
+<!-- ══ APP ═══════════════════════════════════════════════════════════════ -->
+<div class="layout" id="app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🎓</div>
+      <h2>Programa de<br>Indicações</h2>
+      <p>Backoffice</p>
+    </div>
+
+    <!-- Admin-only nav -->
+    <div id="nav-admin" style="display:none">
+      <div class="nav-section">Visão geral</div>
+      <a class="nav-item" id="nav-dashboard" onclick="showView('dashboard',this)" href="#">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <div class="nav-section">Consultas</div>
+      <a class="nav-item" id="nav-indicado" onclick="showView('consulta-indicado',this)" href="#">
+        <span class="nav-icon">🔍</span> Buscar Indicado
+      </a>
+    </div>
+
+    <!-- Shared nav -->
+    <div class="nav-section" id="nav-section-shared">Consultas</div>
+    <a class="nav-item active" id="nav-indicador" onclick="showView('consulta-indicador',this)" href="#">
+      <span class="nav-icon">👤</span> Buscar Indicador
+    </a>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">—</div>
+        <div>
+          <div class="user-name" id="user-name">—</div>
+          <div class="user-role" id="user-role">—</div>
+        </div>
+      </div>
+
+      <!-- Admin-only sync -->
+      <div id="sync-section" style="display:none">
+        <div class="sync-info">Atualizado em<br><span id="sync-time">—</span></div>
+        <button class="sync-btn" id="sync-btn" onclick="loadData(true)">🔄 Atualizar dados</button>
+      </div>
+
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Consultar Indicador</div>
+        <div class="topbar-sub" id="topbar-sub">Busque um indicador e veja o status de seus indicados</div>
+      </div>
+      <div class="badge badge-live" id="status-badge">Ao vivo</div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD (admin only) ── -->
+      <div class="view" id="view-dashboard">
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-blue">
+            <div class="kpi-label">Total de Indicações</div>
+            <div class="kpi-value" id="kpi-total">—</div>
+            <div class="kpi-sub">registros processados</div>
+          </div>
+          <div class="kpi-card kpi-green">
+            <div class="kpi-label">Benefícios Liberados</div>
+            <div class="kpi-value" id="kpi-lib">—</div>
+            <div class="kpi-sub">matrícula confirmada</div>
+          </div>
+          <div class="kpi-card kpi-yellow">
+            <div class="kpi-label">Aguardando Matrícula</div>
+            <div class="kpi-value" id="kpi-agu">—</div>
+            <div class="kpi-sub">indicados sem match</div>
+          </div>
+          <div class="kpi-card kpi-red">
+            <div class="kpi-label">Data Inválida</div>
+            <div class="kpi-value" id="kpi-inv">—</div>
+            <div class="kpi-sub">matrícula anterior à indicação</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <div><strong>Todas as Indicações</strong><div class="table-count" id="dash-count">—</div></div>
+            <div class="filter-tabs">
+              <button class="filter-tab active" onclick="filterDash('todos',this)">Todos</button>
+              <button class="filter-tab" onclick="filterDash('Benefício Liberado',this)">✅ Liberado</button>
+              <button class="filter-tab" onclick="filterDash('Aguardando Matrícula',this)">⏳ Aguardando</button>
+              <button class="filter-tab" onclick="filterDash('Regra de Data Inválida',this)">❌ Inválido</button>
+            </div>
+          </div>
+          <div class="tscroll">
+            <table>
+              <thead><tr>
+                <th>Indicado</th><th>E-mail Indicado</th>
+                <th>Indicador</th><th>E-mail Indicador</th>
+                <th>Data Indicação</th><th>Data Matrícula</th><th>Status</th>
+              </tr></thead>
+              <tbody id="dash-tbody"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span id="dash-page-info">—</span>
+            <div class="page-btns">
+              <button class="page-btn" id="dash-prev" onclick="pageChange(-1)">← Anterior</button>
+              <button class="page-btn" id="dash-next" onclick="pageChange(1)">Próximo →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BUSCAR INDICADO (admin only) ── -->
+      <div class="view" id="view-consulta-indicado">
+        <div class="search-box">
+          <span class="search-label">Buscar Indicado</span>
+          <div class="search-row">
+            <input class="search-input" id="si-input" placeholder="Nome ou e-mail do indicado..." oninput="searchIndicado()">
+            <button class="btn-ghost" onclick="clearInput('si-input',searchIndicado)">Limpar</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <div><strong>Resultado</strong><div class="table-count" id="si-count">Digite para buscar</div></div>
+          </div>
+          <div class="tscroll">
+            <table>
+              <thead><tr>
+                <th>Indicado</th><th>E-mail</th>
+                <th>Indicador</th><th>E-mail Indicador</th>
+                <th>Data Indicação</th><th>Data Matrícula</th><th>Status</th>
+              </tr></thead>
+              <tbody id="si-tbody">
+                <tr><td colspan="7"><div class="empty"><div class="empty-icon">🔍</div><p>Digite para pesquisar</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BUSCAR INDICADOR (todos) ── -->
+      <div class="view active" id="view-consulta-indicador">
+        <div class="search-box">
+          <span class="search-label">Buscar Indicador</span>
+          <div class="search-row">
+            <input class="search-input" id="ind-input" placeholder="Nome do indicador..." oninput="searchIndicador()">
+            <button class="btn-ghost" onclick="clearInput('ind-input',searchIndicador)">Limpar</button>
+          </div>
+        </div>
+        <div id="ind-results">
+          <div class="empty"><div class="empty-icon">👤</div><p>Digite acima para buscar um indicador</p></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+// ══ CONFIG ════════════════════════════════════════════════════════════════
+const SENHAS = {
+  'admin2025':  { role: 'admin',  label: 'Administrador' },
+  'equipe2025': { role: 'colab',  label: 'Colaborador'   }
+};
+
+const SHEETS = {
+  matriculados: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQs9BPqVgl0gqtPN0-LFB70CKx37_NqbxMDD30jUD0quAE92KK5CPd64F8idOIy0mOxtZ-OOftDgAEY/pub?gid=1381421770&single=true&output=csv',
+  indicacoes:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vSFP6o-vHiA32UpCSmojMJqAUS6tBLvIWss0F2UYiHp1pO6-pnS1ytvu62TMrZ5Dt1CFi6rY_llHq6B/pub?gid=636533786&single=true&output=csv'
+};
+
+// ══ STATE ═════════════════════════════════════════════════════════════════
+let SESSION = null;  // { role, label }
+let DATA    = [];    // processed indicações
+let dashFilter = 'todos';
+let dashPage   = 1;
+const PG = 30;
+
+// ══ LOGIN ═════════════════════════════════════════════════════════════════
+function doLogin() {
+  const pwd = document.getElementById('pwd-input').value.trim();
+  const match = SENHAS[pwd];
+  if (!match) {
+    document.getElementById('login-error').textContent = 'Senha incorreta. Tente novamente.';
+    document.getElementById('pwd-input').value = '';
+    return;
+  }
+  SESSION = match;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  setupUI();
+  loadData(false);
+}
+
+function doLogout() {
+  SESSION = null;
+  DATA = [];
+  document.getElementById('pwd-input').value = '';
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ══ UI SETUP ══════════════════════════════════════════════════════════════
+function setupUI() {
+  const isAdmin = SESSION.role === 'admin';
+
+  // User chip
+  const av = document.getElementById('user-avatar');
+  av.textContent = SESSION.label[0];
+  av.className   = 'user-avatar ' + SESSION.role;
+  document.getElementById('user-name').textContent = SESSION.label;
+  document.getElementById('user-role').textContent = isAdmin ? 'Acesso total' : 'Consulta apenas';
+
+  // Show/hide admin areas
+  document.getElementById('nav-admin').style.display   = isAdmin ? 'block' : 'none';
+  document.getElementById('sync-section').style.display = isAdmin ? 'block' : 'none';
+
+  // Adjust nav section label
+  document.getElementById('nav-section-shared').textContent = isAdmin ? '' : 'Consultas';
+
+  if (isAdmin) {
+    // Default view: dashboard for admin
+    showView('dashboard', document.getElementById('nav-dashboard'));
+  } else {
+    showView('consulta-indicador', document.getElementById('nav-indicador'));
+  }
+}
+
+// ══ NAVIGATION ════════════════════════════════════════════════════════════
+const VIEW_META = {
+  'dashboard':          ['Dashboard', 'Visão geral do programa de indicações'],
+  'consulta-indicado':  ['Buscar Indicado', 'Verifique o status de qualquer indicado pelo e-mail ou nome'],
+  'consulta-indicador': ['Buscar Indicador', 'Veja todos os indicados de um indicador e o status de cada um'],
+};
+
+function showView(v, el) {
+  event && event.preventDefault();
+  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const [t, s] = VIEW_META[v] || ['—', ''];
+  document.getElementById('topbar-title').textContent = t;
+  document.getElementById('topbar-sub').textContent   = s;
+}
+
+// ══ CSV PARSER ════════════════════════════════════════════════════════════
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  const headers = splitLine(lines[0]);
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const cols = splitLine(lines[i]);
+    const obj = {};
+    headers.forEach((h,idx) => {
+      const key = h in obj ? h + '_' + idx : h;
+      obj[key] = (cols[idx] || '').trim();
+    });
+    rows.push(obj);
+  }
+  return { headers, rows };
+}
+
+function splitLine(line) {
+  const r=[]; let c=''; let q=false;
+  for (let i=0;i<line.length;i++) {
+    if (line[i]==='"'){q=!q}
+    else if (line[i]===',' && !q){r.push(c);c=''}
+    else {c+=line[i]}
+  }
+  r.push(c);
+  return r;
+}
+
+// ══ DATA PROCESSING ═══════════════════════════════════════════════════════
+function processData(matRows, indRows) {
+  // Map email → matrícula
+  const matMap = {};
+  for (const m of matRows) {
+    const email = (m['Email'] || '').toLowerCase().trim();
+    if (email) matMap[email] = m;
+  }
+
+  const result = [];
+  for (const row of indRows) {
+    const indicador_nome  = (row['Nome'] || '').trim();
+    const indicador_email = (row['*Vamos iniciar!* Digite abaixo seu melhor e-mail.'] || row['email_indicador'] || '').toLowerCase().trim();
+    const submit_date     = row['Submit Date (UTC)'] || '';
+
+    // Collect all indicado slots (up to 3)
+    // Duplicate col names get suffixed with _idx by parser
+    const slots = [];
+    const fnKeys = Object.keys(row).filter(k => k === 'First name' || k.startsWith('First name_'));
+    const emKeys = Object.keys(row).filter(k => k === 'Email' || k.startsWith('Email_'));
+    const maxS = Math.max(fnKeys.length, emKeys.length);
+    for (let s = 0; s < maxS; s++) {
+      const nome  = (row[fnKeys[s]] || '').trim();
+      const email = (row[emKeys[s]] || '').toLowerCase().trim();
+      if (nome || email) slots.push({ nome, email });
+    }
+
+    for (const slot of slots) {
+      if (!slot.nome && !slot.email) continue;
+      const mat = matMap[slot.email];
+      let status, data_mat = '', mat_nome = '';
+
+      if (mat) {
+        data_mat = mat['Data corrigida'] || mat['data_matricula'] || '';
+        mat_nome = mat['Nome'] || '';
+        try {
+          const dI = new Date(submit_date), dM = new Date(data_mat);
+          status = (!isNaN(dI)&&!isNaN(dM)) ? (dM>dI ? 'Benefício Liberado' : 'Regra de Data Inválida') : 'Benefício Liberado';
+        } catch { status = 'Benefício Liberado'; }
+      } else { status = 'Aguardando Matrícula'; }
+
+      result.push({
+        indicador_nome, indicador_email,
+        indicado_nome: slot.nome, indicado_email: slot.email,
+        data_indicacao: submit_date, data_matricula: data_mat,
+        matriculado_nome: mat_nome, status
+      });
+    }
+  }
+  return result;
+}
+
+// ══ LOAD DATA ═════════════════════════════════════════════════════════════
+async function loadData(isRefresh) {
+  const overlay = document.getElementById('overlay');
+  const badge   = document.getElementById('status-badge');
+  const syncBtn = document.getElementById('sync-btn');
+
+  overlay.classList.remove('hidden');
+  if (syncBtn) syncBtn.disabled = true;
+  badge.className = 'badge badge-loading';
+  badge.textContent = 'Carregando...';
+
+  try {
+    setProgress(5, 'Buscando matriculados...');
+    const matText = await (await fetch(SHEETS.matriculados, {cache:'no-store'})).text();
+    setProgress(45, 'Buscando indicações...');
+    const indText = await (await fetch(SHEETS.indicacoes, {cache:'no-store'})).text();
+    setProgress(80, 'Cruzando dados...');
+
+    const { rows: matRows } = parseCSV(matText);
+    const { rows: indRows } = parseCSV(indText);
+    DATA = processData(matRows, indRows);
+
+    setProgress(100, 'Concluído!');
+    updateKPIs();
+    dashPage = 1;
+    renderDashTable();
+
+    const now = new Date().toLocaleString('pt-BR');
+    const syncEl = document.getElementById('sync-time');
+    if (syncEl) syncEl.textContent = now;
+
+    badge.className = 'badge badge-live';
+    badge.textContent = 'Ao vivo';
+    setTimeout(() => { overlay.classList.add('hidden'); if(syncBtn) syncBtn.disabled=false; }, 350);
+
+  } catch(err) {
+    badge.className = 'badge badge-error';
+    badge.textContent = 'Erro';
+    overlay.innerHTML = `<div class="overlay-card">
+      <div class="overlay-icon">⚠️</div>
+      <div class="overlay-title">Erro ao carregar</div>
+      <div class="overlay-sub" style="margin-bottom:20px">${err.message}<br><br>Verifique se as planilhas estão publicadas como CSV.</div>
+      <button class="btn-ghost" onclick="location.reload()">Tentar novamente</button>
+    </div>`;
+    if(syncBtn) syncBtn.disabled = false;
+  }
+}
+
+function setProgress(pct, msg) {
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-step').textContent = msg;
+}
+
+// ══ HELPERS ═══════════════════════════════════════════════════════════════
+function pill(s) {
+  const map = {'Benefício Liberado':'pill-lib','Aguardando Matrícula':'pill-agu','Regra de Data Inválida':'pill-inv'};
+  return `<span class="pill ${map[s]||''}">${s}</span>`;
+}
+function fmtDate(d) {
+  if (!d) return '<span style="color:var(--muted)">—</span>';
+  try { return new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}); } catch { return d; }
+}
+function cap(s) {
+  if (!s) return '—';
+  return s.split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1).toLowerCase():'').join(' ');
+}
+function clearInput(id, fn) { document.getElementById(id).value=''; fn(); }
+
+// ══ KPIs ══════════════════════════════════════════════════════════════════
+function updateKPIs() {
+  document.getElementById('kpi-total').textContent = DATA.length;
+  document.getElementById('kpi-lib').textContent   = DATA.filter(r=>r.status==='Benefício Liberado').length;
+  document.getElementById('kpi-agu').textContent   = DATA.filter(r=>r.status==='Aguardando Matrícula').length;
+  document.getElementById('kpi-inv').textContent   = DATA.filter(r=>r.status==='Regra de Data Inválida').length;
+}
+
+// ══ DASHBOARD TABLE ════════════════════════════════════════════════════════
+function filterDash(f, btn) {
+  dashFilter = f; dashPage = 1;
+  document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDashTable();
+}
+function getFiltered() { return dashFilter==='todos' ? DATA : DATA.filter(r=>r.status===dashFilter); }
+function renderDashTable() {
+  const data  = getFiltered();
+  const total = data.length;
+  const pages = Math.ceil(total/PG)||1;
+  dashPage = Math.max(1,Math.min(dashPage,pages));
+  const slice = data.slice((dashPage-1)*PG, dashPage*PG);
+
+  document.getElementById('dash-count').textContent = `${total} registro${total!==1?'s':''}`;
+  document.getElementById('dash-page-info').textContent = `Página ${dashPage} de ${pages}`;
+  document.getElementById('dash-prev').disabled = dashPage<=1;
+  document.getElementById('dash-next').disabled = dashPage>=pages;
+
+  const tbody = document.getElementById('dash-tbody');
+  if (!slice.length) { tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">📭</div><p>Nenhum registro</p></div></td></tr>'; return; }
+  tbody.innerHTML = slice.map(r=>`<tr>
+    <td class="tn">${cap(r.indicado_nome)}</td>
+    <td class="te">${r.indicado_email||'—'}</td>
+    <td class="tn">${cap(r.indicador_nome)}</td>
+    <td class="te">${r.indicador_email||'—'}</td>
+    <td class="td">${fmtDate(r.data_indicacao)}</td>
+    <td class="td">${fmtDate(r.data_matricula)}</td>
+    <td>${pill(r.status)}</td>
+  </tr>`).join('');
+}
+function pageChange(dir) { dashPage+=dir; renderDashTable(); }
+
+// ══ SEARCH INDICADO (admin) ════════════════════════════════════════════════
+function searchIndicado() {
+  const q = document.getElementById('si-input').value.trim().toLowerCase();
+  const tbody = document.getElementById('si-tbody');
+  const countEl = document.getElementById('si-count');
+  if (q.length<2) {
+    tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🔍</div><p>Digite ao menos 2 caracteres</p></div></td></tr>';
+    countEl.textContent='Digite para buscar'; return;
+  }
+  const res = DATA.filter(r=>(r.indicado_nome||'').toLowerCase().includes(q)||(r.indicado_email||'').toLowerCase().includes(q));
+  countEl.textContent = `${res.length} resultado${res.length!==1?'s':''}`;
+  if (!res.length) { tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">😶</div><p>Nenhum indicado encontrado</p></div></td></tr>'; return; }
+  tbody.innerHTML = res.slice(0,150).map(r=>`<tr>
+    <td class="tn">${cap(r.indicado_nome)}</td>
+    <td class="te">${r.indicado_email||'—'}</td>
+    <td class="tn">${cap(r.indicador_nome)}</td>
+    <td class="te">${r.indicador_email||'—'}</td>
+    <td class="td">${fmtDate(r.data_indicacao)}</td>
+    <td class="td">${fmtDate(r.data_matricula)}</td>
+    <td>${pill(r.status)}</td>
+  </tr>`).join('');
+}
+
+// ══ SEARCH INDICADOR ══════════════════════════════════════════════════════
+function searchIndicador() {
+  const q = document.getElementById('ind-input').value.trim().toLowerCase();
+  const container = document.getElementById('ind-results');
+  const isAdmin = SESSION && SESSION.role === 'admin';
+
+  if (q.length < 2) {
+    container.innerHTML='<div class="empty"><div class="empty-icon">👤</div><p>Digite ao menos 2 caracteres</p></div>'; return;
+  }
+
+  // Group by indicador
+  const map = {};
+  DATA.forEach(r => {
+    const key = r.indicador_email || r.indicador_nome;
+    if (!key) return;
+    const matchNome  = (r.indicador_nome||'').toLowerCase().includes(q);
+    const matchEmail = (r.indicador_email||'').toLowerCase().includes(q);
+    if (matchNome || matchEmail) {
+      if (!map[key]) map[key] = { nome: r.indicador_nome, email: r.indicador_email, list: [] };
+      map[key].list.push(r);
+    }
+  });
+
+  const keys = Object.keys(map);
+  if (!keys.length) { container.innerHTML='<div class="empty"><div class="empty-icon">😶</div><p>Nenhum indicador encontrado</p></div>'; return; }
+
+  container.innerHTML = keys.slice(0,50).map((k,i) => {
+    const g = map[k];
+    const lib = g.list.filter(x=>x.status==='Benefício Liberado').length;
+    const agu = g.list.filter(x=>x.status==='Aguardando Matrícula').length;
+    const inv = g.list.filter(x=>x.status==='Regra de Data Inválida').length;
+
+    // Rows — colaborador sees no e-mails, no dates
+    const rows = g.list.map(r => isAdmin
+      ? `<tr>
+          <td class="tn no-copy">${cap(r.indicado_nome)}</td>
+          <td class="te no-copy">${r.indicado_email||'—'}</td>
+          <td class="td">${fmtDate(r.data_indicacao)}</td>
+          <td class="td">${fmtDate(r.data_matricula)}</td>
+          <td>${pill(r.status)}</td>
+         </tr>`
+      : `<tr>
+          <td class="tn no-copy">${cap(r.indicado_nome)}</td>
+          <td>${pill(r.status)}</td>
+         </tr>`
+    ).join('');
+
+    const thead = isAdmin
+      ? `<tr><th>Indicado</th><th>E-mail</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th></tr>`
+      : `<tr><th>Indicado</th><th>Status</th></tr>`;
+
+    const colSpan = isAdmin ? 5 : 2;
+
+    return `<div class="ind-card" id="ic${i}">
+      <div class="ind-header" onclick="toggleCard('ic${i}')">
+        <div class="ind-info">
+          <h4 class="no-copy">${cap(g.nome)}</h4>
+          ${isAdmin ? `<p class="no-copy">${g.email||'—'}</p>` : ''}
+        </div>
+        <div class="ind-meta">
+          <div class="minibadges">
+            ${lib?`<span class="pill pill-lib">${lib} liberado${lib>1?'s':''}</span>`:''}
+            ${agu?`<span class="pill pill-agu">${agu} aguardando</span>`:''}
+            ${inv?`<span class="pill pill-inv">${inv} inválido${inv>1?'s':''}</span>`:''}
+          </div>
+          <span class="ind-count">${g.list.length} indicado${g.list.length>1?'s':''}</span>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="ind-body">
+        <div class="tscroll">
+          <table><thead>${thead}</thead><tbody>${rows}</tbody></table>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(id) { document.getElementById(id).classList.toggle('open'); }
+
+// ══ SECURITY: disable right-click & shortcuts on colab ════════════════════
+document.addEventListener('contextmenu', e => {
+  if (SESSION && SESSION.role === 'colab') e.preventDefault();
+});
+document.addEventListener('keydown', e => {
+  if (SESSION && SESSION.role === 'colab') {
+    if ((e.ctrlKey||e.metaKey) && ['s','p','u'].includes(e.key.toLowerCase())) e.preventDefault();
+  }
+});
+</script>
+</body>
+</html>
