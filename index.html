@@ -462,10 +462,7 @@ const SENHAS = {
   'equipe2025': { role: 'colab',  label: 'Colaborador'   }
 };
 
-const SHEETS = {
-  matriculados: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQs9BPqVgl0gqtPN0-LFB70CKx37_NqbxMDD30jUD0quAE92KK5CPd64F8idOIy0mOxtZ-OOftDgAEY/pub?gid=1381421770&single=true&output=csv',
-  indicacoes:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vSFP6o-vHiA32UpCSmojMJqAUS6tBLvIWss0F2UYiHp1pO6-pnS1ytvu62TMrZ5Dt1CFi6rY_llHq6B/pub?gid=636533786&single=true&output=csv'
-};
+const APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKA35A5f3wYUFdggHTCAKlsbYmm_TgHsnDb0ofro9LSqk90Qg6Q7feQRBL_PgzvP-bxQ/exec';
 
 // ══ STATE ═════════════════════════════════════════════════════════════════
 let SESSION = null;  // { role, label }
@@ -624,26 +621,6 @@ function processData(matRows, indRows) {
   return result;
 }
 
-
-  async function fetchWithProxy(url) {
-    const proxies = [
-      u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-      u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-    ];
-    let lastErr;
-    for (const proxy of proxies) {
-      try {
-        const res = await fetch(proxy(url), {cache:'no-store'});
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const text = await res.text();
-        if (text && text.length > 10) return text;
-        throw new Error('Resposta vazia');
-      } catch(e) { lastErr = e; }
-    }
-    throw new Error('Todos os proxies falharam: ' + lastErr.message);
-  }
-
 // ══ LOAD DATA ═════════════════════════════════════════════════════════════
 async function loadData(isRefresh) {
   const overlay = document.getElementById('overlay');
@@ -656,10 +633,13 @@ async function loadData(isRefresh) {
   badge.textContent = 'Carregando...';
 
   try {
-    setProgress(5, 'Buscando matriculados...');
-    const matText = await fetchWithProxy(SHEETS.matriculados);
-    setProgress(45, 'Buscando indicações...');
-    const indText = await fetchWithProxy(SHEETS.indicacoes);
+    setProgress(5, 'Buscando dados do Google Sheets...');
+    const res = await fetch(APPS_SCRIPT, {cache:'no-store'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    setProgress(60, 'Processando dados...');
+    const matText = json.mat;
+    const indText = json.ind;
     setProgress(80, 'Cruzando dados...');
 
     const { rows: matRows } = parseCSV(matText);
