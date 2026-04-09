@@ -637,9 +637,9 @@ async function loadData(isRefresh) {
 
   try {
     setProgress(5, 'Buscando matriculados...');
-    const matText = await (await fetch(SHEETS.matriculados, {cache:'no-store'})).text();
+    const matText = await (await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(SHEETS.matriculados)}`, {cache:"no-store"})).text();
     setProgress(45, 'Buscando indicações...');
-    const indText = await (await fetch(SHEETS.indicacoes, {cache:'no-store'})).text();
+    const indText = await (await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(SHEETS.indicacoes)}`, {cache:"no-store"})).text();
     setProgress(80, 'Cruzando dados...');
 
     const { rows: matRows } = parseCSV(matText);
