@@ -541,29 +541,45 @@ function splitLine(line) {
 function processData(matRows, indRows) {
   const matMap = {};
   for (const m of matRows) {
-    const email = (m['Email']||'').toLowerCase().trim();
-    if (email) matMap[email] = m;
+    // MAT columns: [0]=Data matricula [1]=Nome [2]=Email [8]=Data corrigida
+    const cols = m.__cols || [];
+    const email = (cols[2]||m['Email']||'').toLowerCase().trim();
+    if (email) {
+      matMap[email] = {
+        ...m,
+        _nome: (cols[1]||m['Nome']||'').trim(),
+        _email: email,
+        _data: (cols[8]||m['Data corrigida']||'').trim()
+      };
+    }
   }
   const result = [];
   for (const row of indRows) {
     const cols = row.__cols || [];
-    if (cols.length < 8) continue;
+    if (cols.length < 7) continue;
+    // Column map (confirmed from live data):
+    // [0]=email_indicador [1]=nome_indicador [2]=tel [3]=ja_aluno [4]=CPF
+    // [5]=Nome_ind1 [6]=Tel_ind1 [7]=Email_ind1
+    // [8]=Deseja? [9]=Nome_ind2 [10]=Tel_ind2 [11]=Email_ind2
+    // [12]=Deseja? [13]=Nome_ind3 [14]=Tel_ind3 [15]=Email_ind3
+    // [16]=Deseja? [17]=Nome_ind4 [18]=Tel_ind4 [19]=Email_ind4
+    // [26]=Submitted At
     const indicador_email = (cols[0]||'').toLowerCase().trim();
     const indicador_nome  = (cols[1]||'').trim();
-    const submit_date     = (cols[27]||'').trim();
+    const submit_date     = (cols[26]||'').trim();
     const slots = [
-      { nome:(cols[6]||'').trim(),  email:(cols[8]||'').toLowerCase().trim()  },
-      { nome:(cols[10]||'').trim(), email:(cols[12]||'').toLowerCase().trim() },
-      { nome:(cols[14]||'').trim(), email:(cols[16]||'').toLowerCase().trim() },
-      { nome:(cols[18]||'').trim(), email:(cols[20]||'').toLowerCase().trim() },
+      { nome:(cols[5]||'').trim(),  email:(cols[7]||'').toLowerCase().trim()  },
+      { nome:(cols[9]||'').trim(),  email:(cols[11]||'').toLowerCase().trim() },
+      { nome:(cols[13]||'').trim(), email:(cols[15]||'').toLowerCase().trim() },
+      { nome:(cols[17]||'').trim(), email:(cols[19]||'').toLowerCase().trim() },
     ];
     for (const slot of slots) {
       if (!slot.nome && !slot.email) continue;
       const mat = matMap[slot.email];
       let status, data_mat='', mat_nome='';
       if (mat) {
-        data_mat = mat['Data corrigida']||'';
-        mat_nome = mat['Nome']||'';
+        data_mat = mat._data || mat['Data corrigida']||'';
+        mat_nome = mat._nome || mat['Nome']||'';
         try {
           const dI=new Date(submit_date), dM=new Date(data_mat);
           status=(!isNaN(dI)&&!isNaN(dM))?(dM>dI?'Benefício Liberado':'Regra de Data Inválida'):'Benefício Liberado';
@@ -590,10 +606,13 @@ async function loadData(isRefresh) {
     const raw = await res.text();
     let json;
     try { json=JSON.parse(raw.trim().replace(/^\uFEFF/,'')); } catch(e) { throw new Error('JSON inválido: '+raw.slice(0,80)); }
-    if(!json.mat||!json.ind) throw new Error('Campos ausentes na resposta');
+    // Support both old (mat/ind) and new (mat_full/ind_full) response formats
+    const matText = json.mat || json.mat_full;
+    const indText = json.ind || json.ind_full;
+    if(!matText||!indText) throw new Error('Campos ausentes na resposta. mat='+(!!matText)+' ind='+(!!indText));
     setProgress(70,'Processando...');
-    const {rows:matRows}=parseCSV(json.mat);
-    const {rows:indRows}=parseCSV(json.ind);
+    const {rows:matRows}=parseCSV(matText);
+    const {rows:indRows}=parseCSV(indText);
     DATA=processData(matRows,indRows);
     setProgress(100,'Concluído!');
     updateKPIs(); dashPage=1; renderDashTable();
