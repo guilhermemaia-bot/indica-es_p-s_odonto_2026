@@ -634,9 +634,15 @@ async function loadData(isRefresh) {
 
   try {
     setProgress(5, 'Buscando dados do Google Sheets...');
-    const res = await fetch(APPS_SCRIPT, {cache:'no-store'});
+    const res = await fetch(APPS_SCRIPT + '?t=' + Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
+    const raw = await res.text();
+    // Apps Script pode retornar com BOM ou wrapper - limpar antes de parsear
+    const cleaned = raw.trim().replace(/^\uFEFF/, '');
+    let json;
+    try { json = JSON.parse(cleaned); }
+    catch(e) { throw new Error('Resposta inválida do servidor: ' + cleaned.slice(0,100)); }
+    if (!json.mat || !json.ind) throw new Error('Campos mat/ind ausentes na resposta');
     setProgress(60, 'Processando dados...');
     const matText = json.mat;
     const indText = json.ind;
@@ -665,8 +671,8 @@ async function loadData(isRefresh) {
     overlay.innerHTML = `<div class="overlay-card">
       <div class="overlay-icon">⚠️</div>
       <div class="overlay-title">Erro ao carregar</div>
-      <div class="overlay-sub" style="margin-bottom:20px">${err.message}<br><br>Verifique se as planilhas estão publicadas como CSV.</div>
-      <button class="btn-ghost" onclick="location.reload()">Tentar novamente</button>
+      <div class="overlay-sub" style="margin-bottom:20px">${err.message}</div>
+      <button class="btn-ghost" onclick="loadData(false)">Tentar novamente</button>
     </div>`;
     if(syncBtn) syncBtn.disabled = false;
   }
