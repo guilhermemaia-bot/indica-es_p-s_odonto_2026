@@ -629,9 +629,9 @@ async function loadData(isRefresh) {
   const overlay=document.getElementById('overlay');
   const badge=document.getElementById('status-badge');
   const syncBtn=document.getElementById('sync-btn');
-  overlay.classList.remove('hidden');
+  if(overlay) overlay.classList.remove('hidden');
   if(syncBtn) syncBtn.disabled=true;
-  badge.className='badge badge-loading'; badge.textContent='Carregando...';
+  if(badge){ badge.className='badge badge-loading'; badge.textContent='Carregando...'; }
   try {
     setProgress(5,'Buscando dados...');
     const res = await fetch(APPS_SCRIPT+'?t='+Date.now());
@@ -659,15 +659,18 @@ async function loadData(isRefresh) {
     updateKPIs(); dashPage=1; renderDashTable();
     const now=new Date().toLocaleString('pt-BR');
     const st=document.getElementById('sync-time'); if(st) st.textContent=now;
-    badge.className='badge badge-live'; badge.textContent='Ao vivo';
-    setTimeout(()=>{ overlay.classList.add('hidden'); if(syncBtn) syncBtn.disabled=false; },350);
+    if(badge){ badge.className='badge badge-live'; badge.textContent='Ao vivo'; }
+    setTimeout(()=>{ if(overlay) overlay.classList.add('hidden'); if(syncBtn) syncBtn.disabled=false; },350);
   } catch(err) {
-    badge.className='badge badge-error'; badge.textContent='Erro';
-    overlay.innerHTML=`<div class="overlay-card"><div class="overlay-icon">⚠️</div><div class="overlay-title">Erro ao carregar</div><div class="overlay-sub" style="margin-bottom:20px">${err.message}</div><button class="btn btn-ghost" onclick="loadData(false)">Tentar novamente</button></div>`;
+    if(badge){ badge.className='badge badge-error'; badge.textContent='Erro'; }
+    if(overlay) overlay.innerHTML=`<div class="overlay-card"><div class="overlay-icon">⚠️</div><div class="overlay-title">Erro ao carregar</div><div class="overlay-sub" style="margin-bottom:20px">${err.message}</div><button class="btn btn-ghost" onclick="loadData(false)">Tentar novamente</button></div>`;
     if(syncBtn) syncBtn.disabled=false;
   }
 }
-function setProgress(pct,msg){document.getElementById('prog-fill').style.width=pct+'%';document.getElementById('prog-step').textContent=msg;}
+function setProgress(pct,msg){
+  const pf=document.getElementById('prog-fill'); if(pf) pf.style.width=pct+'%';
+  const ps=document.getElementById('prog-step'); if(ps) ps.textContent=msg;
+}
 
 // ══ HELPERS ═══════════════════════════════════════════
 function pill(s){const m={'Benefício Liberado':'pill-lib','Aguardando Matrícula':'pill-agu','Regra de Data Inválida':'pill-inv'};return `<span class="pill ${m[s]||''}">${s}</span>`;}
