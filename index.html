@@ -427,7 +427,6 @@ const SENHAS = {
   'equipe2025': { role:'colab', label:'Colaborador' }
 };
 const APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKA35A5f3wYUFdggHTCAKlsbYmm_TgHsnDb0ofro9LSqk90Qg6Q7feQRBL_PgzvP-bxQ/exec';
-const STORAGE_KEY = 'indicacoes_entregas_v1';
 
 // ══ STATE ════════════════════════════════════════════
 let SESSION = null;
@@ -440,26 +439,38 @@ const PG = 30;
 // Current modal context
 let modalCtx = null; // { indicador_email, indicador_nome, indicado_email, indicado_nome }
 
-// ══ ENTREGAS STORAGE ══════════════════════════════════
-function loadEntregas() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    ENTREGAS = raw ? JSON.parse(raw) : {};
-  } catch { ENTREGAS = {}; }
-}
-function saveEntregas() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(ENTREGAS));
-}
+// ══ ENTREGAS — Google Sheets via Apps Script ══════════
+function loadEntregas() { /* loaded from Apps Script on data load */ }
 function getEntregaKey(email) { return (email||'').toLowerCase().trim(); }
 function getEntrega(email) { return ENTREGAS[getEntregaKey(email)] || null; }
-function setEntrega(email, tipo, entregador, unidade) {
+
+async function setEntrega(email, tipo, entregador, unidade, nome) {
   const key = getEntregaKey(email);
-  if (!ENTREGAS[key]) ENTREGAS[key] = { email: key, tipos: [], entregador, unidade, data: new Date().toISOString() };
+  // Update local state immediately for instant UI feedback
+  if (!ENTREGAS[key]) ENTREGAS[key] = { email: key, tipos: [], entregador, unidade, nome: nome||'', data: new Date().toISOString() };
   if (!ENTREGAS[key].tipos.includes(tipo)) ENTREGAS[key].tipos.push(tipo);
   ENTREGAS[key].entregador = entregador;
-  ENTREGAS[key].unidade = unidade;
-  ENTREGAS[key].data = new Date().toISOString();
-  saveEntregas();
+  ENTREGAS[key].unidade    = unidade;
+  ENTREGAS[key].nome       = nome || '';
+  ENTREGAS[key].data       = new Date().toISOString();
+
+  // Persist to Google Sheets
+  try {
+    await fetch(APPS_SCRIPT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email:      key,
+        tipos:      ENTREGAS[key].tipos,
+        entregador: entregador,
+        unidade:    unidade,
+        nome:       nome || '',
+        data:       ENTREGAS[key].data
+      })
+    });
+  } catch(err) {
+    console.warn('Erro ao salvar entrega no Sheets:', err);
+  }
 }
 
 // ══ LOGIN / LOGOUT ════════════════════════════════════
@@ -470,7 +481,6 @@ function doLogin() {
   SESSION = match;
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='flex';
-  loadEntregas();
   setupUI();
   loadData(false);
 }
@@ -633,6 +643,14 @@ async function loadData(isRefresh) {
     const matText = json.mat || json.mat_full;
     const indText = json.ind || json.ind_full;
     if(!matText||!indText) throw new Error('Campos ausentes na resposta. mat='+(!!matText)+' ind='+(!!indText));
+    
+    // Load entregas from Sheets
+    const entregasArr = json.entregas || [];
+    ENTREGAS = {};
+    entregasArr.forEach(e => {
+      if (e.email) ENTREGAS[e.email.toLowerCase().trim()] = e;
+    });
+
     setProgress(70,'Processando...');
     const {rows:matRows}=parseCSV(matText);
     const {rows:indRows}=parseCSV(indText);
@@ -838,7 +856,7 @@ function fecharModal() {
   modalCtx = null;
 }
 
-function confirmarEntrega() {
+async function confirmarEntrega() {
   const entregador = document.getElementById('modal-entregador-nome').value.trim();
   const unidade    = document.getElementById('modal-entregador-unidade').value.trim();
   const errEl      = document.getElementById('modal-error');
@@ -856,7 +874,7 @@ function confirmarEntrega() {
   if (!selected.length) { errEl.textContent = 'Selecione ao menos um beneficiário.'; return; }
 
   for (const s of selected) {
-    setEntrega(s.email, s.tipo, entregador, unidade);
+    await setEntrega(s.email, s.tipo, entregador, unidade, s.nome);
   }
 
   fecharModal();
@@ -891,7 +909,6 @@ function renderEntregasAdmin() {
 function removerEntrega(email) {
   if (!confirm(`Remover registro de entrega para ${email}?`)) return;
   delete ENTREGAS[getEntregaKey(email)];
-  saveEntregas();
   updateKPIs();
   renderEntregasAdmin();
 }
@@ -902,7 +919,7 @@ function exportEntregas() {
   const lines = ['email,tipos,entregador,unidade,data'];
   keys.forEach(k => {
     const e = ENTREGAS[k];
-    lines.push(`"${k}","${(e.tipos||[]).join('|')}","${e.entregador||''}","${e.unidade||''}","${e.data||''}"`);
+    lines.push(`"${k}","${(e.tipos||[]).join('|')}","${e.entregador||''}","${e.unidade||''}","${e.data||''}","${e.nome||''}"`);
   });
   const blob = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
