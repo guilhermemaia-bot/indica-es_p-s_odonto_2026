@@ -641,7 +641,7 @@ function processData(matRows, indRows) {
           if (!dI || !dM) {
             status = 'Aguardando Matrícula';
           } else {
-            status = dM > dI ? 'Benefício Liberado' : 'Regra de Data Inválida';
+            status = dM >= dI ? 'Benefício Liberado' : 'Regra de Data Inválida';
           }
         } catch { status='Aguardando Matrícula'; }
       } else { status='Aguardando Matrícula'; }
