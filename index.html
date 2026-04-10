@@ -568,7 +568,7 @@ function processData(matRows, indRows) {
         ...m,
         _nome: (cols[1]||m['Nome']||'').trim(),
         _email: email,
-        _data: (cols[8]||m['Data corrigida']||'').trim()
+        _data: (cols[0]||'').trim()  // col[0] = Data da matricula
       };
     }
   }
@@ -617,7 +617,7 @@ function processData(matRows, indRows) {
       const mat = matMap[slot.email];
       let status, data_mat='', mat_nome='';
       if (mat) {
-        data_mat = mat._data || mat['Data corrigida']||'';
+        data_mat = mat._data || '';
         mat_nome = mat._nome || mat['Nome']||'';
         try {
           const px = d => {
