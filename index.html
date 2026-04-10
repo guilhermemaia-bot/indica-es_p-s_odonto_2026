@@ -454,20 +454,18 @@ async function setEntrega(email, tipo, entregador, unidade, nome) {
   ENTREGAS[key].nome       = nome || '';
   ENTREGAS[key].data       = new Date().toISOString();
 
-  // Persist to Google Sheets
+  // Persist to Google Sheets via GET with params (avoids CORS preflight)
   try {
-    await fetch(APPS_SCRIPT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email:      key,
-        tipos:      ENTREGAS[key].tipos,
-        entregador: entregador,
-        unidade:    unidade,
-        nome:       nome || '',
-        data:       ENTREGAS[key].data
-      })
+    const params = new URLSearchParams({
+      action:     'saveEntrega',
+      email:      key,
+      tipos:      ENTREGAS[key].tipos.join('|'),
+      entregador: entregador,
+      unidade:    unidade,
+      nome:       nome || '',
+      data:       ENTREGAS[key].data
     });
+    await fetch(APPS_SCRIPT + '?' + params.toString(), { mode: 'no-cors' });
   } catch(err) {
     console.warn('Erro ao salvar entrega no Sheets:', err);
   }
@@ -582,23 +580,26 @@ function processData(matRows, indRows) {
       }
     }
 
-    // Find indicado slots: starting at col 5, groups of Nome+Tel+Email
-    // separated by "Deseja?" cols (0/1/TRUE/FALSE or empty)
+    // Fixed slot positions (confirmed from live header):
+    // [5]=Nome_ind1 [6]=Tel_ind1 [7]=Email_ind1
+    // [8]=Deseja?   [9]=Nome_ind2 [10]=Tel_ind2 [11]=Email_ind2
+    // [12]=Deseja?  [13]=Nome_ind3 [14]=Tel_ind3 [15]=Email_ind3
+    // [16]=Deseja?  [17]=Nome_ind4 [18]=Tel_ind4 [19]=Email_ind4
+    const SLOT_COLS = [[5,7],[9,11],[13,15],[17,19]];
     const slots = [];
-    let i = 5;
-    while (i + 2 < cols.length) {
-      const nome  = (cols[i]||'').trim();
-      const email = (cols[i+2]||'').toLowerCase().trim();
-      const isValidEmail = email.includes('@');
-      const isValidName  = nome && !nome.includes('@') && nome !== 'TRUE' && nome !== 'FALSE' && nome !== '0' && nome !== '1';
-      if (isValidName || isValidEmail) {
-        slots.push({ nome, email });
-      }
-      // Check if next col after group is a separator (Deseja?)
-      const sep = (cols[i+3]||'').trim();
-      const isSep = sep === '0' || sep === '1' || sep === '' || sep === 'TRUE' || sep === 'FALSE';
-      i += isSep ? 4 : 3;
-      if (slots.length >= 6) break;
+    for (var si = 0; si < SLOT_COLS.length; si++) {
+      const nc = SLOT_COLS[si][0], ec = SLOT_COLS[si][1];
+      const nome  = (cols[nc]||'').trim();
+      const email = (cols[ec]||'').toLowerCase().trim();
+      // Skip if empty, or UTM/placeholder values
+      if (!nome && !email) continue;
+      if (email === 'xxxxx' || nome === 'xxxxx') continue;
+      if (nome === 'false' || nome === 'true' || nome === '0' || nome === '1') continue;
+      if (nome.startsWith('{{') || email.startsWith('{{')) continue;
+      if (nome === 'qr_code' || nome === 'meta' || nome.startsWith('br_rmkt')) continue;
+      if (email && !email.includes('@')) continue; // must be valid email if present
+      if (!nome && !email.includes('@')) continue;
+      slots.push({ nome, email });
     }
     for (const slot of slots) {
       if (!slot.nome && !slot.email) continue;
