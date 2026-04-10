@@ -256,7 +256,18 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="modal-field">
       <label>Unidade</label>
-      <input id="modal-entregador-unidade" type="text" placeholder="Ex: Campinas, SP">
+      <select id="modal-entregador-unidade">
+        <option value="">Selecione a unidade...</option>
+        <option value="Araras">Araras</option>
+        <option value="Campinas">Campinas</option>
+        <option value="Grande Vitória">Grande Vitória</option>
+        <option value="Fortaleza">Fortaleza</option>
+        <option value="São Paulo">São Paulo</option>
+        <option value="Curitiba">Curitiba</option>
+        <option value="Brasília">Brasília</option>
+        <option value="Belo Horizonte">Belo Horizonte</option>
+        <option value="Rio de Janeiro">Rio de Janeiro</option>
+      </select>
     </div>
     <div class="modal-actions">
       <button class="btn btn-green" onclick="confirmarEntrega()" style="flex:1">✅ Confirmar Entrega</button>
@@ -610,14 +621,29 @@ function processData(matRows, indRows) {
         mat_nome = mat._nome || mat['Nome']||'';
         try {
           const px = d => {
-            if (!d) return NaN;
-            const m = d.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-            if (m) return new Date(m[3]+'-'+m[2]+'-'+m[1]);
-            return new Date(d);
+            if (!d) return null;
+            // DD/MM/YYYY or DD/MM/YY
+            let m = d.match(/^(\d{2})\/(\d{2})\/(\d{2,4})/);
+            if (m) {
+              const yr = m[3].length===2 ? '20'+m[3] : m[3];
+              return new Date(yr+'-'+m[2]+'-'+m[1]);
+            }
+            // ISO: 2024-01-02T... or 2024-01-02
+            m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (m) return new Date(d);
+            // JS Date string: "Sat Dec 06 2025 11:10:18 GMT..."
+            // or "Wed Jan 14 2026 20:40:47 GMT..."
+            const parsed = new Date(d);
+            if (!isNaN(parsed)) return parsed;
+            return null;
           };
           const dI=px(submit_date), dM=px(data_mat);
-          status=(!isNaN(dI)&&!isNaN(dM))?(dM>dI?'Benefício Liberado':'Regra de Data Inválida'):'Benefício Liberado';
-        } catch { status='Benefício Liberado'; }
+          if (!dI || !dM) {
+            status = 'Aguardando Matrícula';
+          } else {
+            status = dM > dI ? 'Benefício Liberado' : 'Regra de Data Inválida';
+          }
+        } catch { status='Aguardando Matrícula'; }
       } else { status='Aguardando Matrícula'; }
       result.push({ indicador_nome, indicador_email, indicado_nome:slot.nome, indicado_email:slot.email, data_indicacao:submit_date, data_matricula:data_mat, matriculado_nome:mat_nome, status });
     }
