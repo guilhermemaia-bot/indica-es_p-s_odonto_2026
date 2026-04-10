@@ -620,27 +620,32 @@ function processData(matRows, indRows) {
         data_mat = mat._data || '';
         mat_nome = mat._nome || mat['Nome']||'';
         try {
+          // Parse date, strip time component to compare only dates
           const px = d => {
             if (!d) return null;
-            // DD/MM/YYYY or DD/MM/YY
+            // DD/MM/YYYY
             let m = d.match(/^(\d{2})\/(\d{2})\/(\d{2,4})/);
             if (m) {
               const yr = m[3].length===2 ? '20'+m[3] : m[3];
-              return new Date(yr+'-'+m[2]+'-'+m[1]);
+              return yr+'-'+m[2]+'-'+m[1]; // return as YYYY-MM-DD string
             }
-            // ISO: 2024-01-02T... or 2024-01-02
-            m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (m) return new Date(d);
-            // JS Date string: "Sat Dec 06 2025 11:10:18 GMT..."
-            // or "Wed Jan 14 2026 20:40:47 GMT..."
+            // YYYY-MM-DD HH:MM:SS or YYYY-MM-DDTHH:MM:SS
+            m = d.match(/^(\d{4}-\d{2}-\d{2})/);
+            if (m) return m[1]; // return only date part
+            // JS Date string fallback
             const parsed = new Date(d);
-            if (!isNaN(parsed)) return parsed;
+            if (!isNaN(parsed)) {
+              return parsed.getFullYear()+'-'+
+                String(parsed.getMonth()+1).padStart(2,'0')+'-'+
+                String(parsed.getDate()).padStart(2,'0');
+            }
             return null;
           };
           const dI=px(submit_date), dM=px(data_mat);
           if (!dI || !dM) {
             status = 'Aguardando Matrícula';
           } else {
+            // Compare date strings directly (YYYY-MM-DD format sorts correctly)
             status = dM >= dI ? 'Benefício Liberado' : 'Regra de Data Inválida';
           }
         } catch { status='Aguardando Matrícula'; }
