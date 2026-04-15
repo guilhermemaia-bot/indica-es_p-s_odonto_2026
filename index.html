@@ -664,6 +664,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
             <div>🎓 <strong style="color:var(--accent)">Mestrado / Doutorado</strong> → 50% de desconto</div>
             <div>📚 <strong style="color:var(--yellow)">Especialização</strong> → 30% de desconto</div>
             <div>📋 <strong style="color:var(--muted)">Outras modalidades</strong> → 10% de desconto</div>
+            <div style="width:100%;padding-top:8px;border-top:1px solid var(--border);color:var(--muted2)">📅 Elegível somente matrículas a partir de <strong style="color:var(--muted)">23/03/2026</strong> (data de implantação do benefício)</div>
           </div>
         </div>
 
@@ -1354,6 +1355,9 @@ function descontoLabel(pct) {
   return `<span class="desc-badge desc-10">10% — Outras</span>`;
 }
 
+// Apenas matrículas APÓS esta data são elegíveis a desconto em parcela
+const DESCONTO_CUTOFF = '2026-03-23';
+
 // Build per-indicador discount report
 function buildDescontoData() {
   // Group by indicador, only 'Benefício Liberado' rows
@@ -1365,33 +1369,42 @@ function buildDescontoData() {
     map[k].validos.push(r);
   });
 
-  // For each indicador with 2+ valid, compute discounts (skip 1st, apply from 2nd)
   const result = [];
   Object.values(map).forEach(ind => {
-    if (ind.validos.length < 2) return; // 1st only → brinde, no discount
-    // Sort by data_matricula to determine order (earliest = 1st)
+    if (ind.validos.length < 2) return; // só 1 indicado válido → apenas brinde, sem desconto
+
+    // Ordenar por data de matrícula (mais antiga = 1ª)
     const sorted = [...ind.validos].sort((a, b) => {
       const da = parseToISO(a.data_matricula) || '9999';
       const db = parseToISO(b.data_matricula) || '9999';
       return da < db ? -1 : da > db ? 1 : 0;
     });
-    // Skip first (index 0), apply discount from index 1 onwards
-    const descDescontos = sorted.slice(1).map(r => ({
-      indicado_nome:  r.indicado_nome,
-      indicado_email: r.indicado_email,
-      nivel:          r.nivel || '—',
-      data_matricula: r.data_matricula,
-      pct:            descontoPct(r.nivel)
-    }));
+
+    // A partir da 2ª matrícula, aplicar desconto SOMENTE se data_matricula >= 23/03/2026
+    const descontos = sorted.slice(1)
+      .filter(r => {
+        const dm = parseToISO(r.data_matricula);
+        return dm && dm >= DESCONTO_CUTOFF;
+      })
+      .map(r => ({
+        indicado_nome:  r.indicado_nome,
+        indicado_email: r.indicado_email,
+        nivel:          r.nivel || '—',
+        data_matricula: r.data_matricula,
+        pct:            descontoPct(r.nivel)
+      }));
+
+    if (!descontos.length) return; // nenhuma matrícula elegível após a data de corte
+
     result.push({
       nome:          ind.nome,
       email:         ind.email,
       total_validos: ind.validos.length,
       primeira:      sorted[0],
-      descontos:     descDescontos
+      descontos
     });
   });
-  // Sort by number of discounts desc
+
   result.sort((a, b) => b.descontos.length - a.descontos.length || b.total_validos - a.total_validos);
   return result;
 }
