@@ -153,6 +153,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .pill-inv{background:var(--red-dim);color:var(--red);border:1px solid rgba(240,82,82,0.2)}
 .pill-entregue{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,0.2)}
 .pill-pendente{background:rgba(245,166,35,0.08);color:var(--yellow);border:1px solid rgba(245,166,35,0.15)}
+.pill-cni{background:rgba(240,82,82,0.06);color:#e07b30;border:1px solid rgba(224,123,48,0.25)}
 
 /* ── PAGINATION ── */
 .pagination{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
@@ -346,10 +347,6 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <a class="nav-item" id="nav-dashboard" onclick="showView('dashboard',this)" href="#">
         <span class="nav-icon">📊</span> Dashboard
       </a>
-      <div class="nav-section">Consultas</div>
-      <a class="nav-item" id="nav-indicado" onclick="showView('consulta-indicado',this)" href="#">
-        <span class="nav-icon">🔍</span> Buscar Indicado
-      </a>
       <div class="nav-section">Análises</div>
       <a class="nav-item" id="nav-analytics" onclick="showView('analytics',this)" href="#">
         <span class="nav-icon">📈</span> Análises Avançadas
@@ -360,9 +357,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </a>
     </div>
 
-    <div class="nav-section">Consultas</div>
-    <a class="nav-item active" id="nav-busca" onclick="showView('consulta-geral',this)" href="#">
-      <span class="nav-icon">🔍</span> Buscar Beneficiário
+    <div class="nav-section">Brindes</div>
+    <a class="nav-item active" id="nav-brinde" onclick="showView('entrega-brinde',this)" href="#">
+      <span class="nav-icon">🎁</span> Entrega de Brinde
     </a>
 
     <div class="sidebar-footer">
@@ -391,10 +388,11 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
       <!-- DASHBOARD -->
       <div class="view" id="view-dashboard">
-        <div class="kpi-grid">
+        <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr)">
           <div class="kpi-card kpi-blue"><div class="kpi-label">Total de Indicações</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub">registros processados</div></div>
           <div class="kpi-card kpi-green"><div class="kpi-label">Benefícios Liberados</div><div class="kpi-value" id="kpi-lib">—</div><div class="kpi-sub">matrícula confirmada</div></div>
           <div class="kpi-card kpi-yellow"><div class="kpi-label">Aguardando Matrícula</div><div class="kpi-value" id="kpi-agu">—</div><div class="kpi-sub">indicados sem match</div></div>
+          <div class="kpi-card kpi-red"><div class="kpi-label">Curso Não Iniciado</div><div class="kpi-value" id="kpi-cni">—</div><div class="kpi-sub">aguardando início do curso</div></div>
           <div class="kpi-card kpi-purple"><div class="kpi-label">Brindes Entregues</div><div class="kpi-value" id="kpi-brinde">—</div><div class="kpi-sub">entregas registradas</div></div>
         </div>
         <div class="table-wrap">
@@ -404,12 +402,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
               <button class="filter-tab active" onclick="filterDash('todos',this)">Todos</button>
               <button class="filter-tab" onclick="filterDash('Benefício Liberado',this)">✅ Liberado</button>
               <button class="filter-tab" onclick="filterDash('Aguardando Matrícula',this)">⏳ Aguardando</button>
+              <button class="filter-tab" onclick="filterDash('Curso Não Iniciado',this)">🕐 Curso Não Iniciado</button>
               <button class="filter-tab" onclick="filterDash('Regra de Data Inválida',this)">❌ Inválido</button>
             </div>
           </div>
           <div class="tscroll">
             <table><thead><tr>
-              <th>Indicado</th><th>E-mail</th><th>Indicador</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>Brinde</th>
+              <th>Indicado</th><th>E-mail</th><th>Indicador</th><th>Data Indicação</th><th>Data Matrícula</th><th>Nível do Curso</th><th>Início do Curso</th><th>Status</th><th>Brinde</th>
             </tr></thead><tbody id="dash-tbody"></tbody></table>
           </div>
           <div class="pagination">
@@ -422,38 +421,24 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </div>
       </div>
 
-      <!-- BUSCAR INDICADO (admin) -->
-      <div class="view" id="view-consulta-indicado">
-        <div class="search-box">
-          <span class="search-label">Buscar Indicado</span>
-          <div class="search-row">
-            <input class="search-input" id="si-input" placeholder="Nome ou e-mail do indicado..." oninput="searchIndicado()">
-            <button class="btn btn-ghost" onclick="document.getElementById('si-input').value='';searchIndicado()">Limpar</button>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <div class="table-header"><div><strong>Resultado</strong><div class="table-count" id="si-count">Digite para buscar</div></div></div>
-          <div class="tscroll">
-            <table><thead><tr>
-              <th>Indicado</th><th>E-mail</th><th>Indicador</th><th>E-mail Indicador</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>Brinde</th>
-            </tr></thead><tbody id="si-tbody">
-              <tr><td colspan="8"><div class="empty"><div class="empty-icon">🔍</div><p>Digite para pesquisar</p></div></td></tr>
-            </tbody></table>
-          </div>
-        </div>
-      </div>
-
-      <!-- BUSCAR GERAL (colaborador) -->
-      <div class="view active" id="view-consulta-geral">
-        <div class="search-box">
+      <!-- ENTREGA DE BRINDE (admin + colab) -->
+      <div class="view active" id="view-entrega-brinde">
+        <div class="search-box" style="margin-bottom:16px">
           <span class="search-label">Buscar Indicador ou Indicado</span>
           <div class="search-row">
-            <input class="search-input" id="geral-input" placeholder="Nome do indicador ou indicado..." oninput="searchGeral()">
-            <button class="btn btn-ghost" onclick="document.getElementById('geral-input').value='';searchGeral()">Limpar</button>
+            <input class="search-input" id="brinde-input" placeholder="Nome ou e-mail do indicador ou indicado..." oninput="searchBrinde()">
+            <button class="btn btn-ghost" onclick="document.getElementById('brinde-input').value='';searchBrinde()">Limpar</button>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap" id="brinde-filter-tabs">
+            <button class="filter-tab active" onclick="setBrindeFilter('todos',this)">Todos</button>
+            <button class="filter-tab" onclick="setBrindeFilter('Benefício Liberado',this)">✅ Liberado</button>
+            <button class="filter-tab" onclick="setBrindeFilter('Aguardando Matrícula',this)">⏳ Aguardando</button>
+            <button class="filter-tab" onclick="setBrindeFilter('Regra de Data Inválida',this)">❌ Data Inválida</button>
+            <button class="filter-tab" onclick="setBrindeFilter('Curso Não Iniciado',this)">🕐 Curso Não Iniciado</button>
           </div>
         </div>
-        <div id="geral-results">
-          <div class="empty"><div class="empty-icon">🔍</div><p>Digite acima para buscar</p></div>
+        <div id="brinde-results">
+          <div class="empty"><div class="empty-icon">🎁</div><p>Digite acima para buscar um beneficiário</p></div>
         </div>
       </div>
 
@@ -686,16 +671,15 @@ function setupUI() {
   document.getElementById('nav-admin').style.display = isAdmin ? 'block' : 'none';
   document.getElementById('sync-section').style.display = isAdmin ? 'block' : 'none';
   if (isAdmin) { showView('dashboard', document.getElementById('nav-dashboard')); }
-  else { showView('consulta-geral', document.getElementById('nav-busca')); }
+  else { showView('entrega-brinde', document.getElementById('nav-brinde')); }
 }
 
 // ══ NAVIGATION ════════════════════════════════════════
 const VIEW_META = {
-  'dashboard':         ['Dashboard','Visão geral do programa'],
-  'consulta-indicado': ['Buscar Indicado','Pesquise pelo nome ou e-mail do indicado'],
-  'consulta-geral':    ['Buscar Beneficiário','Pesquise por indicador ou indicado'],
-  'admin-tools':       ['Ferramentas Admin','Importação e exportação de dados'],
-  'analytics':         ['Análises Avançadas','Evolução, engajamento e ranking de indicadores'],
+  'dashboard':       ['Dashboard','Visão geral do programa'],
+  'entrega-brinde':  ['Entrega de Brinde','Busque por indicador ou indicado para registrar entregas'],
+  'analytics':       ['Análises Avançadas','Evolução, engajamento e ranking de indicadores'],
+  'admin-tools':     ['Ferramentas Admin','Importação e exportação de dados'],
 };
 function showView(v, el) {
   event && event.preventDefault();
@@ -733,41 +717,75 @@ function splitLine(line) {
 }
 
 // ══ DATA PROCESSING ═══════════════════════════════════
+// Normalize any date string → 'YYYY-MM-DD' or null
+function parseToISO(d) {
+  if (!d) return null;
+  const s = String(d).trim();
+  let m;
+  // DD/MM/YYYY or DD/MM/YY
+  m = s.match(/^(\d{2})\/(\d{2})\/(\d{2,4})/);
+  if (m) {
+    const yr = m[3].length === 2 ? '20' + m[3] : m[3];
+    return yr + '-' + m[2] + '-' + m[1];
+  }
+  // YYYY-MM-DD (with optional time)
+  m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (m) return m[1];
+  // JS Date fallback
+  const parsed = new Date(s);
+  if (!isNaN(parsed)) {
+    return parsed.getFullYear() + '-' +
+      String(parsed.getMonth() + 1).padStart(2, '0') + '-' +
+      String(parsed.getDate()).padStart(2, '0');
+  }
+  return null;
+}
+
+// Today's date as YYYY-MM-DD (local)
+function todayISO() {
+  const t = new Date();
+  return t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
+}
+
 function processData(matRows, indRows) {
   const matMap = {};
   for (const m of matRows) {
-    // MAT columns: [0]=Data matricula [1]=Nome [2]=Email [8]=Data corrigida
+    // MAT columns (updated schema):
+    // [0]=Data da matricula [1]=Nome [2]=Email [3]=Telefone [4]=País [5]=Estado [6]=Cidade [7]=CEP
+    // [8]=DI (código do curso) [9]=Nível [10]=Data de início
     const cols = m.__cols || [];
-    const email = (cols[2]||m['Email']||'').toLowerCase().trim();
+    const email = (cols[2] || m['Email'] || '').toLowerCase().trim();
     if (email) {
       matMap[email] = {
         ...m,
-        _nome: (cols[1]||m['Nome']||'').trim(),
-        _email: email,
-        _data: (cols[0]||'').trim()  // col[0] = Data da matricula
+        _nome:        (cols[1] || m['Nome'] || '').trim(),
+        _email:       email,
+        _data:        (cols[0] || '').trim(),          // Data da matrícula
+        _di:          (cols[8] || '').trim(),           // DI / código do curso
+        _nivel:       (cols[9] || '').trim(),           // Nível do curso
+        _data_inicio: (cols[10] || '').trim(),          // Data de início do curso
       };
     }
   }
+
+  const today = todayISO();
+
   const result = [];
   for (const row of indRows) {
     const cols = row.__cols || [];
     if (cols.length < 7) continue;
 
-    const indicador_email = (cols[0]||'').toLowerCase().trim();
-    const indicador_nome  = (cols[1]||'').trim();
+    const indicador_email = (cols[0] || '').toLowerCase().trim();
+    const indicador_nome  = (cols[1] || '').trim();
 
-    // Find Submitted At: scan from col 20 onwards looking for a date-time value
-    // Format is "DD/MM/YYYY HH:MM:SS" or "YYYY-MM-DD"
+    // Find Submitted At: scan from col 20 onwards for a date-time value
     let submit_date = '';
     for (let ci = cols.length - 1; ci >= 20; ci--) {
-      const val = (cols[ci]||'').trim();
-      if (val && /\d{2}[\/\-]\d{2}[\/\-]\d{2,4}/.test(val)) {
-        submit_date = val;
-        break;
-      }
+      const val = (cols[ci] || '').trim();
+      if (val && /\d{2}[\/\-]\d{2}[\/\-]\d{2,4}/.test(val)) { submit_date = val; break; }
     }
 
-    // Fixed slot positions (confirmed from live header):
+    // Fixed slot positions:
     // [5]=Nome_ind1 [6]=Tel_ind1 [7]=Email_ind1
     // [8]=Deseja?   [9]=Nome_ind2 [10]=Tel_ind2 [11]=Email_ind2
     // [12]=Deseja?  [13]=Nome_ind3 [14]=Tel_ind3 [15]=Email_ind3
@@ -776,57 +794,57 @@ function processData(matRows, indRows) {
     const slots = [];
     for (var si = 0; si < SLOT_COLS.length; si++) {
       const nc = SLOT_COLS[si][0], ec = SLOT_COLS[si][1];
-      const nome  = (cols[nc]||'').trim();
-      const email = (cols[ec]||'').toLowerCase().trim();
-      // Skip if empty, or UTM/placeholder values
+      const nome  = (cols[nc] || '').trim();
+      const email = (cols[ec] || '').toLowerCase().trim();
       if (!nome && !email) continue;
       if (email === 'xxxxx' || nome === 'xxxxx') continue;
       if (nome === 'false' || nome === 'true' || nome === '0' || nome === '1') continue;
       if (nome.startsWith('{{') || email.startsWith('{{')) continue;
       if (nome === 'qr_code' || nome === 'meta' || nome.startsWith('br_rmkt')) continue;
-      if (email && !email.includes('@')) continue; // must be valid email if present
+      if (email && !email.includes('@')) continue;
       if (!nome && !email.includes('@')) continue;
       slots.push({ nome, email });
     }
+
     for (const slot of slots) {
       if (!slot.nome && !slot.email) continue;
       const mat = matMap[slot.email];
-      let status, data_mat='', mat_nome='';
+      let status, data_mat = '', mat_nome = '', di = '', nivel = '', data_inicio = '', data_inicio_iso = '';
+
       if (mat) {
-        data_mat = mat._data || '';
-        mat_nome = mat._nome || mat['Nome']||'';
-        try {
-          // Parse date, strip time component to compare only dates
-          const px = d => {
-            if (!d) return null;
-            // DD/MM/YYYY
-            let m = d.match(/^(\d{2})\/(\d{2})\/(\d{2,4})/);
-            if (m) {
-              const yr = m[3].length===2 ? '20'+m[3] : m[3];
-              return yr+'-'+m[2]+'-'+m[1]; // return as YYYY-MM-DD string
-            }
-            // YYYY-MM-DD HH:MM:SS or YYYY-MM-DDTHH:MM:SS
-            m = d.match(/^(\d{4}-\d{2}-\d{2})/);
-            if (m) return m[1]; // return only date part
-            // JS Date string fallback
-            const parsed = new Date(d);
-            if (!isNaN(parsed)) {
-              return parsed.getFullYear()+'-'+
-                String(parsed.getMonth()+1).padStart(2,'0')+'-'+
-                String(parsed.getDate()).padStart(2,'0');
-            }
-            return null;
-          };
-          const dI=px(submit_date), dM=px(data_mat);
-          if (!dI || !dM) {
-            status = 'Aguardando Matrícula';
-          } else {
-            // Compare date strings directly (YYYY-MM-DD format sorts correctly)
-            status = dM >= dI ? 'Benefício Liberado' : 'Regra de Data Inválida';
-          }
-        } catch { status='Aguardando Matrícula'; }
-      } else { status='Aguardando Matrícula'; }
-      result.push({ indicador_nome, indicador_email, indicado_nome:slot.nome, indicado_email:slot.email, data_indicacao:submit_date, data_matricula:data_mat, matriculado_nome:mat_nome, status });
+        data_mat       = mat._data || '';
+        mat_nome       = mat._nome || '';
+        di             = mat._di   || '';
+        nivel          = mat._nivel || '';
+        data_inicio    = mat._data_inicio || '';
+        data_inicio_iso = parseToISO(data_inicio) || '';
+
+        const dI = parseToISO(submit_date);
+        const dM = parseToISO(data_mat);
+
+        if (!dI || !dM) {
+          status = 'Aguardando Matrícula';
+        } else if (dM < dI) {
+          // Matrícula anterior à indicação
+          status = 'Regra de Data Inválida';
+        } else if (data_inicio_iso && data_inicio_iso > today) {
+          // Curso ainda não começou
+          status = 'Curso Não Iniciado';
+        } else {
+          status = 'Benefício Liberado';
+        }
+      } else {
+        status = 'Aguardando Matrícula';
+      }
+
+      result.push({
+        indicador_nome, indicador_email,
+        indicado_nome: slot.nome, indicado_email: slot.email,
+        data_indicacao: submit_date, data_matricula: data_mat,
+        matriculado_nome: mat_nome,
+        di, nivel, data_inicio, data_inicio_iso,
+        status
+      });
     }
   }
   return result;
@@ -871,6 +889,7 @@ async function loadData(isRefresh) {
     // If analytics view is visible, refresh it
     const av=document.querySelector('.view.active');
     if(av&&av.id==='view-analytics') renderAnalytics();
+    if(av&&av.id==='view-entrega-brinde') searchBrinde();
     setTimeout(()=>{ if(overlay) overlay.classList.add('hidden'); if(syncBtn) syncBtn.disabled=false; },350);
   } catch(err) {
     if(badge){ badge.className='badge badge-error'; badge.textContent='Erro'; }
@@ -884,7 +903,7 @@ function setProgress(pct,msg){
 }
 
 // ══ HELPERS ═══════════════════════════════════════════
-function pill(s){const m={'Benefício Liberado':'pill-lib','Aguardando Matrícula':'pill-agu','Regra de Data Inválida':'pill-inv'};return `<span class="pill ${m[s]||''}">${s}</span>`;}
+function pill(s){const m={'Benefício Liberado':'pill-lib','Aguardando Matrícula':'pill-agu','Regra de Data Inválida':'pill-inv','Curso Não Iniciado':'pill-cni'};return `<span class="pill ${m[s]||''}">${s}</span>`;}
 function fmtDate(d){if(!d)return '<span style="color:var(--muted)">—</span>';try{return new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}catch{return d;}}
 function cap(s){if(!s)return '—';return s.split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1).toLowerCase():'').join(' ');}
 
@@ -910,6 +929,7 @@ function updateKPIs(){
   document.getElementById('kpi-total').textContent=DATA.length;
   document.getElementById('kpi-lib').textContent=DATA.filter(r=>r.status==='Benefício Liberado').length;
   document.getElementById('kpi-agu').textContent=DATA.filter(r=>r.status==='Aguardando Matrícula').length;
+  document.getElementById('kpi-cni').textContent=DATA.filter(r=>r.status==='Curso Não Iniciado').length;
   document.getElementById('kpi-brinde').textContent=Object.keys(ENTREGAS).length;
 }
 
@@ -932,94 +952,110 @@ function renderDashTable(){
     <td class="tn">${cap(r.indicador_nome)}</td>
     <td class="td">${fmtDate(r.data_indicacao)}</td>
     <td class="td">${fmtDate(r.data_matricula)}</td>
+    <td style="font-size:12px;color:var(--muted)">${r.nivel||'—'}</td>
+    <td class="td">${r.data_inicio ? fmtDate(r.data_inicio) + (r.data_inicio_iso > todayISO() ? ' <span style="color:var(--yellow);font-size:10px">▲ futuro</span>' : '') : '<span style="color:var(--muted)">—</span>'}</td>
     <td>${pill(r.status)}</td>
     <td>${r.status==='Benefício Liberado'?brindePill(r.indicado_email,r.indicado_nome):'—'}</td>
   </tr>`).join('');
 }
 function pageChange(dir){dashPage+=dir;renderDashTable();}
 
-// ══ SEARCH INDICADO (admin) ═══════════════════════════
-function searchIndicado(){
-  const q=document.getElementById('si-input').value.trim().toLowerCase();
-  const tbody=document.getElementById('si-tbody');
-  const countEl=document.getElementById('si-count');
-  if(q.length<2){tbody.innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-icon">🔍</div><p>Digite ao menos 2 caracteres</p></div></td></tr>';countEl.textContent='Digite para buscar';return;}
-  const res=DATA.filter(r=>(r.indicado_nome||'').toLowerCase().includes(q)||(r.indicado_email||'').toLowerCase().includes(q));
-  countEl.textContent=`${res.length} resultado${res.length!==1?'s':''}`;
-  if(!res.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-icon">😶</div><p>Nenhum resultado</p></div></td></tr>';return;}
-  tbody.innerHTML=res.slice(0,150).map(r=>`<tr>
-    <td class="tn">${cap(r.indicado_nome)}</td><td class="te">${r.indicado_email||'—'}</td>
-    <td class="tn">${cap(r.indicador_nome)}</td><td class="te">${r.indicador_email||'—'}</td>
-    <td class="td">${fmtDate(r.data_indicacao)}</td><td class="td">${fmtDate(r.data_matricula)}</td>
-    <td>${pill(r.status)}</td>
-    <td>${r.status==='Benefício Liberado'?brindePill(r.indicado_email,r.indicado_nome)+'<br>'+btnEntrega(r.indicador_nome,r.indicador_email,r.indicado_nome,r.indicado_email,r.status):'—'}</td>
-  </tr>`).join('');
+// ══ ENTREGA DE BRINDE — unified search ═══════════════
+let brindeFilter = 'todos';
+
+function setBrindeFilter(f, btn) {
+  brindeFilter = f;
+  document.querySelectorAll('#brinde-filter-tabs .filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  searchBrinde();
 }
 
-// ══ SEARCH GERAL (colaborador + admin) ════════════════
-function searchGeral(){
-  const q=document.getElementById('geral-input').value.trim().toLowerCase();
-  const container=document.getElementById('geral-results');
-  if(q.length<2){container.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><p>Digite ao menos 2 caracteres</p></div>';return;}
-  const isAdmin=SESSION&&SESSION.role==='admin';
+function searchBrinde() {
+  const q = document.getElementById('brinde-input').value.trim().toLowerCase();
+  const container = document.getElementById('brinde-results');
+  if (q.length < 2) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">🎁</div><p>Digite ao menos 2 caracteres para buscar</p></div>';
+    return;
+  }
+  const isAdmin = SESSION && SESSION.role === 'admin';
 
-  // Group by indicador, filtering where indicador OR any indicado matches
-  const map={};
-  DATA.forEach(r=>{
-    const matchInd   = (r.indicador_nome||'').toLowerCase().includes(q)||(r.indicador_email||'').toLowerCase().includes(q);
-    const matchInddo = (r.indicado_nome||'').toLowerCase().includes(q)||(r.indicado_email||'').toLowerCase().includes(q);
-    if(!matchInd&&!matchInddo) return;
-    const key=r.indicador_email||r.indicador_nome;
-    if(!map[key]) map[key]={nome:r.indicador_nome,email:r.indicador_email,list:[],matchedInddo:[]};
-    map[key].list.push(r);
-    if(matchInddo) map[key].matchedInddo.push(r.indicado_email);
+  // Filter DATA by query and status filter
+  let filtered = DATA.filter(r => {
+    const matchQ = (r.indicador_nome||'').toLowerCase().includes(q) ||
+                   (r.indicador_email||'').toLowerCase().includes(q) ||
+                   (r.indicado_nome||'').toLowerCase().includes(q) ||
+                   (r.indicado_email||'').toLowerCase().includes(q);
+    if (!matchQ) return false;
+    if (brindeFilter === 'todos') return true;
+    return r.status === brindeFilter;
   });
 
-  const keys=Object.keys(map);
-  if(!keys.length){container.innerHTML='<div class="empty"><div class="empty-icon">😶</div><p>Nenhum resultado encontrado</p></div>';return;}
+  // Group by indicador
+  const map = {};
+  filtered.forEach(r => {
+    const key = r.indicador_email || r.indicador_nome;
+    if (!map[key]) map[key] = { nome: r.indicador_nome, email: r.indicador_email, list: [], matchedInddo: [] };
+    map[key].list.push(r);
+    if ((r.indicado_nome||'').toLowerCase().includes(q) || (r.indicado_email||'').toLowerCase().includes(q)) {
+      map[key].matchedInddo.push(r.indicado_email);
+    }
+  });
 
-  container.innerHTML=keys.slice(0,50).map((k,i)=>{
-    const g=map[k];
-    const lib=g.list.filter(x=>x.status==='Benefício Liberado').length;
-    const agu=g.list.filter(x=>x.status==='Aguardando Matrícula').length;
-    const inv=g.list.filter(x=>x.status==='Regra de Data Inválida').length;
-    const entregaInd=getEntrega(g.email);
+  const keys = Object.keys(map);
+  if (!keys.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">😶</div><p>Nenhum resultado encontrado</p></div>';
+    return;
+  }
 
-    // Indicador brinde row
+  container.innerHTML = keys.slice(0, 60).map((k, i) => {
+    const g = map[k];
+    const lib  = g.list.filter(x => x.status === 'Benefício Liberado').length;
+    const agu  = g.list.filter(x => x.status === 'Aguardando Matrícula').length;
+    const inv  = g.list.filter(x => x.status === 'Regra de Data Inválida').length;
+    const cni  = g.list.filter(x => x.status === 'Curso Não Iniciado').length;
+    const entregaInd = getEntrega(g.email);
+
     const indBrinde = entregaInd
       ? `<div class="brinde-entregue">🎁 Brinde entregue ao Indicador</div><div class="entrega-info">Por <strong>${cap(entregaInd.entregador)}</strong> · ${cap(entregaInd.unidade)} · ${fmtDate(entregaInd.data)}</div>`
-      : (lib>0 ? `<button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="abrirModal('${esc(g.nome)}','${esc(g.email)}','','')">🎁 Marcar entrega ao Indicador</button>` : '');
+      : (lib > 0 ? `<button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="abrirModal('${esc(g.nome)}','${esc(g.email)}','','')">🎁 Marcar entrega ao Indicador</button>` : '');
 
-    const rows=g.list.map(r=>{
-      const entregaInddo=getEntrega(r.indicado_email);
-      const highlight=g.matchedInddo.includes(r.indicado_email)?'background:rgba(79,142,247,0.05);':'';
-      const brindeTd = r.status==='Benefício Liberado'
+    const rows = g.list.map(r => {
+      const entregaInddo = getEntrega(r.indicado_email);
+      const highlight = g.matchedInddo.includes(r.indicado_email) ? 'background:rgba(79,142,247,0.05);' : '';
+      const nivelTd = `<td style="font-size:11px;color:var(--muted)">${r.nivel||'—'}</td>`;
+      const inicioBadge = r.data_inicio
+        ? `${fmtDate(r.data_inicio)}${r.data_inicio_iso > todayISO() ? ' <span style="font-size:10px;color:var(--yellow)">▲</span>' : ''}`
+        : '<span style="color:var(--muted)">—</span>';
+      const brindeTd = r.status === 'Benefício Liberado'
         ? `<td>${entregaInddo
             ? `<div><span class="brinde-entregue">🎁 Entregue</span><div class="entrega-info">Por <strong>${cap(entregaInddo.entregador)}</strong> · ${cap(entregaInddo.unidade)}<br>${fmtDate(entregaInddo.data)}</div></div>`
             : `<div><span class="brinde-pendente">⏳ Pendente</span><br><button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="abrirModal('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}')">🎁 Marcar Entrega</button></div>`
           }</td>`
-        : '<td>—</td>';
+        : `<td><span style="font-size:12px;color:var(--muted)">—</span></td>`;
       return `<tr style="${highlight}">
         <td class="tn no-copy">${cap(r.indicado_nome)}</td>
         <td class="td">${fmtDate(r.data_indicacao)}</td>
         <td class="td">${fmtDate(r.data_matricula)}</td>
+        ${nivelTd}
+        <td class="td">${inicioBadge}</td>
         <td>${pill(r.status)}</td>
         ${brindeTd}
       </tr>`;
     }).join('');
 
-    return `<div class="ind-card" id="gc${i}">
-      <div class="ind-header" onclick="toggleCard('gc${i}')">
+    return `<div class="ind-card" id="bc${i}">
+      <div class="ind-header" onclick="toggleCard('bc${i}')">
         <div class="ind-info">
           <h4 class="no-copy">${cap(g.nome)}</h4>
-          ${isAdmin?`<p class="no-copy">${g.email||'—'}</p>`:''}
+          ${isAdmin ? `<p class="no-copy" style="font-size:11px;color:var(--muted)">${g.email || '—'}</p>` : ''}
           <div style="margin-top:6px">${indBrinde}</div>
         </div>
         <div class="ind-meta">
           <div class="minibadges">
-            ${lib?`<span class="pill pill-lib">${lib} liberado${lib>1?'s':''}</span>`:''}
-            ${agu?`<span class="pill pill-agu">${agu} aguardando</span>`:''}
-            ${inv?`<span class="pill pill-inv">${inv} inválido${inv>1?'s':''}</span>`:''}
+            ${lib ? `<span class="pill pill-lib">${lib} liberado${lib>1?'s':''}</span>` : ''}
+            ${agu ? `<span class="pill pill-agu">${agu} aguardando</span>` : ''}
+            ${cni ? `<span class="pill pill-cni">${cni} não iniciado${cni>1?'s':''}</span>` : ''}
+            ${inv ? `<span class="pill pill-inv">${inv} inválido${inv>1?'s':''}</span>` : ''}
           </div>
           <span class="ind-count">${g.list.length} indicado${g.list.length>1?'s':''}</span>
           <span class="chevron">▼</span>
@@ -1027,7 +1063,9 @@ function searchGeral(){
       </div>
       <div class="ind-body">
         <div class="tscroll">
-          <table><thead><tr><th>Indicado</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>Brinde Indicado</th></tr></thead>
+          <table><thead><tr>
+            <th>Indicado</th><th>Data Indicação</th><th>Data Matrícula</th><th>Nível</th><th>Início do Curso</th><th>Status</th><th>Brinde</th>
+          </tr></thead>
           <tbody>${rows}</tbody></table>
         </div>
       </div>
@@ -1095,8 +1133,7 @@ async function confirmarEntrega() {
   updateKPIs();
   // Refresh current view
   const activeView = document.querySelector('.view.active');
-  if (activeView && activeView.id === 'view-consulta-geral') searchGeral();
-  if (activeView && activeView.id === 'view-consulta-indicado') searchIndicado();
+  if (activeView && activeView.id === 'view-entrega-brinde') searchBrinde();
   if (activeView && activeView.id === 'view-dashboard') renderDashTable();
   if (activeView && activeView.id === 'view-admin-tools') renderEntregasAdmin();
 }
@@ -1296,9 +1333,11 @@ function renderFunil() {
   const lib = DATA.filter(r=>r.status==='Benefício Liberado').length;
   const agu = DATA.filter(r=>r.status==='Aguardando Matrícula').length;
   const inv = DATA.filter(r=>r.status==='Regra de Data Inválida').length;
+  const cni = DATA.filter(r=>r.status==='Curso Não Iniciado').length;
   const pctLib = total ? Math.round(lib/total*100) : 0;
   const pctAgu = total ? Math.round(agu/total*100) : 0;
   const pctInv = total ? Math.round(inv/total*100) : 0;
+  const pctCni = total ? Math.round(cni/total*100) : 0;
   document.getElementById('funil-chart').innerHTML = `
     <div class="funnel-step" style="border-color:rgba(79,142,247,0.3)">
       <div class="funnel-icon">📋</div>
@@ -1316,6 +1355,11 @@ function renderFunil() {
       <div class="funnel-icon">⏳</div>
       <div class="funnel-label">Aguardando Matrícula</div>
       <div><span class="funnel-val" style="color:var(--yellow)">${agu}</span><span class="funnel-pct">${pctAgu}%</span></div>
+    </div>
+    <div class="funnel-step" style="border-color:rgba(224,123,48,0.3)">
+      <div class="funnel-icon">🕐</div>
+      <div class="funnel-label">Curso Não Iniciado</div>
+      <div><span class="funnel-val" style="color:#e07b30">${cni}</span><span class="funnel-pct">${pctCni}%</span></div>
     </div>
     <div class="funnel-step" style="border-color:rgba(240,82,82,0.2)">
       <div class="funnel-icon">❌</div>
