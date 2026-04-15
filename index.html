@@ -51,8 +51,14 @@ a{text-decoration:none} button{cursor:pointer;font-family:'DM Sans',sans-serif}
 .sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
 .user-chip{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:10px}
 .user-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
-.user-avatar.admin{background:rgba(79,142,247,0.2);color:var(--accent)}
-.user-avatar.colab{background:rgba(52,212,138,0.2);color:var(--green)}
+.user-avatar.fin{background:rgba(167,139,250,0.2);color:var(--purple)}
+/* Discount badges */
+.desc-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;margin:2px}
+.desc-50{background:rgba(79,142,247,0.15);color:var(--accent);border:1px solid rgba(79,142,247,0.3)}
+.desc-30{background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(245,166,35,0.3)}
+.desc-10{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.desc-detail-row{font-size:11px;color:var(--muted);line-height:1.7}
+.desc-detail-row strong{color:var(--text)}
 .user-name{font-size:12px;font-weight:500}
 .user-role{font-size:10px;color:var(--muted);margin-top:1px}
 .logout-btn{width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;color:var(--muted);transition:all .15s}
@@ -351,13 +357,23 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <a class="nav-item" id="nav-analytics" onclick="showView('analytics',this)" href="#">
         <span class="nav-icon">📈</span> Análises Avançadas
       </a>
+      <a class="nav-item" id="nav-descontos" onclick="showView('descontos',this)" href="#">
+        <span class="nav-icon">💸</span> Desconto em Parcela
+      </a>
       <div class="nav-section">Administração</div>
       <a class="nav-item" id="nav-admin-tools" onclick="showView('admin-tools',this)" href="#">
         <span class="nav-icon">⚙️</span> Ferramentas Admin
       </a>
     </div>
 
-    <div class="nav-section">Brindes</div>
+    <div id="nav-financeiro" style="display:none">
+      <div class="nav-section">Relatório</div>
+      <a class="nav-item" id="nav-descontos-fin" onclick="showView('descontos',this)" href="#">
+        <span class="nav-icon">💸</span> Desconto em Parcela
+      </a>
+    </div>
+
+    <div class="nav-section" id="nav-section-brindes">Brindes</div>
     <a class="nav-item active" id="nav-brinde" onclick="showView('entrega-brinde',this)" href="#">
       <span class="nav-icon">🎁</span> Entrega de Brinde
     </a>
@@ -586,6 +602,73 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </div>
       </div>
 
+      <!-- DESCONTO EM PARCELA -->
+      <div class="view" id="view-descontos">
+
+        <!-- KPIs row -->
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px" id="desc-kpi-grid">
+          <div class="kpi-card kpi-blue"><div class="kpi-label">Indicadores Elegíveis</div><div class="kpi-value" id="desc-kpi-ind">—</div><div class="kpi-sub">com 2+ matriculados válidos</div></div>
+          <div class="kpi-card kpi-purple"><div class="kpi-label">Total de Descontos</div><div class="kpi-value" id="desc-kpi-total">—</div><div class="kpi-sub">parcelas a descontar</div></div>
+          <div class="kpi-card kpi-green"><div class="kpi-label">Desconto 50%</div><div class="kpi-value" id="desc-kpi-50">—</div><div class="kpi-sub">Mestrado / Doutorado</div></div>
+          <div class="kpi-card kpi-yellow"><div class="kpi-label">Desconto 30%</div><div class="kpi-value" id="desc-kpi-30">—</div><div class="kpi-sub">Especialização</div></div>
+        </div>
+
+        <!-- Filters + export -->
+        <div class="table-wrap">
+          <div class="table-header" style="flex-wrap:wrap;gap:10px">
+            <div>
+              <strong>Indicadores com Desconto em Parcela</strong>
+              <div class="table-count" id="desc-count">—</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input id="desc-search" class="search-input" style="width:200px;padding:7px 12px;font-size:12px" placeholder="Filtrar por nome ou e-mail..." oninput="renderDescontos()">
+              <div class="filter-tabs" id="desc-filter-tabs">
+                <button class="filter-tab active" onclick="setDescFilter('todos',this)">Todos</button>
+                <button class="filter-tab" onclick="setDescFilter('50',this)">50% Mestrado/Dout.</button>
+                <button class="filter-tab" onclick="setDescFilter('30',this)">30% Especialização</button>
+                <button class="filter-tab" onclick="setDescFilter('10',this)">10% Outros</button>
+              </div>
+              <button class="btn btn-primary" style="white-space:nowrap" onclick="exportDescontos()">⬇️ Exportar CSV</button>
+            </div>
+          </div>
+
+          <div class="tscroll">
+            <table>
+              <thead><tr>
+                <th style="width:32px">#</th>
+                <th>Indicador</th>
+                <th>E-mail</th>
+                <th style="text-align:center">Indicados Válidos</th>
+                <th>Descontos a Aplicar</th>
+                <th>Detalhes por Indicado</th>
+              </tr></thead>
+              <tbody id="desc-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="pagination">
+            <span id="desc-page-info">—</span>
+            <div class="page-btns">
+              <button class="page-btn" id="desc-prev" onclick="descPageChange(-1)">← Anterior</button>
+              <button class="page-btn" id="desc-next" onclick="descPageChange(1)">Próximo →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div style="margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Regra de Cálculo</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)">
+            <div>🎁 <strong style="color:var(--text)">1ª indicação</strong> → apenas brinde (sem desconto)</div>
+            <div>💸 <strong style="color:var(--green)">2ª+ indicação</strong> → desconto em 1 mensalidade por indicado</div>
+            <div>🎓 <strong style="color:var(--accent)">Mestrado / Doutorado</strong> → 50% de desconto</div>
+            <div>📚 <strong style="color:var(--yellow)">Especialização</strong> → 30% de desconto</div>
+            <div>📋 <strong style="color:var(--muted)">Outras modalidades</strong> → 10% de desconto</div>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 </div>
@@ -593,8 +676,18 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <script>
 // ══ CONFIG ════════════════════════════════════════════
 const SENHAS = {
-  'admin2025': { role:'admin', label:'Administrador' },
-  'equipe2025': { role:'colab', label:'Colaborador' }
+  'admin2025':      { role:'admin',      label:'Administrador',    unidade: null },
+  'financeiro2025': { role:'financeiro', label:'Financeiro',       unidade: null },
+  'araras2025':     { role:'equipe',     label:'Equipe Araras',    unidade: 'Araras' },
+  'campinas2025':   { role:'equipe',     label:'Equipe Campinas',  unidade: 'Campinas' },
+  'vitoria2025':    { role:'equipe',     label:'Equipe Gde Vitória', unidade: 'Grande Vitória' },
+  'fortaleza2025':  { role:'equipe',     label:'Equipe Fortaleza', unidade: 'Fortaleza' },
+  'saopaulo2025':   { role:'equipe',     label:'Equipe São Paulo', unidade: 'São Paulo' },
+  'curitiba2025':   { role:'equipe',     label:'Equipe Curitiba',  unidade: 'Curitiba' },
+  'brasilia2025':   { role:'equipe',     label:'Equipe Brasília',  unidade: 'Brasília' },
+  'bh2025':         { role:'equipe',     label:'Equipe BH',        unidade: 'Belo Horizonte' },
+  'rio2025':        { role:'equipe',     label:'Equipe Rio',       unidade: 'Rio de Janeiro' },
+  'equipe2025':     { role:'equipe',     label:'Colaborador',      unidade: null }
 };
 const APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKA35A5f3wYUFdggHTCAKlsbYmm_TgHsnDb0ofro9LSqk90Qg6Q7feQRBL_PgzvP-bxQ/exec';
 
@@ -662,16 +755,35 @@ function doLogout() {
 
 // ══ UI SETUP ══════════════════════════════════════════
 function setupUI() {
-  const isAdmin = SESSION.role==='admin';
+  const role = SESSION.role;
+  const isAdmin = role === 'admin';
+  const isFin   = role === 'financeiro';
+  const isEquipe = role === 'equipe';
+
   const av = document.getElementById('user-avatar');
   av.textContent = SESSION.label[0];
-  av.className = 'user-avatar ' + SESSION.role;
+  av.className = 'user-avatar ' + (isAdmin ? 'admin' : isEquipe ? 'colab' : 'fin');
   document.getElementById('user-name').textContent = SESSION.label;
-  document.getElementById('user-role').textContent = isAdmin ? 'Acesso total' : 'Consulta + Entregas';
-  document.getElementById('nav-admin').style.display = isAdmin ? 'block' : 'none';
-  document.getElementById('sync-section').style.display = isAdmin ? 'block' : 'none';
-  if (isAdmin) { showView('dashboard', document.getElementById('nav-dashboard')); }
-  else { showView('entrega-brinde', document.getElementById('nav-brinde')); }
+  document.getElementById('user-role').textContent = isAdmin ? 'Acesso total' : isFin ? 'Financeiro' : SESSION.unidade || 'Equipe';
+
+  document.getElementById('nav-admin').style.display      = isAdmin ? 'block' : 'none';
+  document.getElementById('nav-financeiro').style.display = isFin   ? 'block' : 'none';
+  document.getElementById('sync-section').style.display   = isAdmin ? 'block' : 'none';
+
+  // Financeiro only sees discounts — hide brinde nav
+  const brindeSection = document.getElementById('nav-section-brindes');
+  const brindeLink    = document.getElementById('nav-brinde');
+  if (isFin) {
+    brindeSection.style.display = 'none';
+    brindeLink.style.display    = 'none';
+  } else {
+    brindeSection.style.display = '';
+    brindeLink.style.display    = '';
+  }
+
+  if (isAdmin)  { showView('dashboard',      document.getElementById('nav-dashboard')); }
+  else if (isFin) { showView('descontos',    document.getElementById('nav-descontos-fin')); }
+  else           { showView('entrega-brinde', document.getElementById('nav-brinde')); }
 }
 
 // ══ NAVIGATION ════════════════════════════════════════
@@ -680,6 +792,7 @@ const VIEW_META = {
   'entrega-brinde':  ['Entrega de Brinde','Busque por indicador ou indicado para registrar entregas'],
   'analytics':       ['Análises Avançadas','Evolução, engajamento e ranking de indicadores'],
   'admin-tools':     ['Ferramentas Admin','Importação e exportação de dados'],
+  'descontos':       ['Desconto em Parcela','Indicadores elegíveis a desconto por múltiplas indicações válidas'],
 };
 function showView(v, el) {
   event && event.preventDefault();
@@ -691,7 +804,8 @@ function showView(v, el) {
   document.getElementById('topbar-title').textContent=t;
   document.getElementById('topbar-sub').textContent=s;
   if(v==='admin-tools') renderEntregasAdmin();
-  if(v==='analytics') renderAnalytics();
+  if(v==='analytics')   renderAnalytics();
+  if(v==='descontos')   renderDescontos();
 }
 
 // ══ CSV PARSER ════════════════════════════════════════
@@ -1210,6 +1324,183 @@ function importCSV(event) {
     }
   };
   reader.readAsText(file, 'UTF-8');
+}
+
+// ══ DESCONTO EM PARCELA ══════════════════════════════
+let descFilter = 'todos';
+let descPage   = 1;
+const DESC_PG  = 25;
+
+function setDescFilter(f, btn) {
+  descFilter = f;
+  btn.closest('#desc-filter-tabs').querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  descPage = 1;
+  renderDescontos();
+}
+function descPageChange(dir) { descPage += dir; renderDescontos(); }
+
+// Determine discount % by nivel
+function descontoPct(nivel) {
+  if (!nivel) return 10;
+  const n = nivel.toLowerCase();
+  if (n.includes('mestrado') || n.includes('doutorado')) return 50;
+  if (n.includes('especializa')) return 30;
+  return 10;
+}
+function descontoLabel(pct) {
+  if (pct === 50) return `<span class="desc-badge desc-50">50% — Mestrado/Dout.</span>`;
+  if (pct === 30) return `<span class="desc-badge desc-30">30% — Especialização</span>`;
+  return `<span class="desc-badge desc-10">10% — Outras</span>`;
+}
+
+// Build per-indicador discount report
+function buildDescontoData() {
+  // Group by indicador, only 'Benefício Liberado' rows
+  const map = {};
+  DATA.forEach(r => {
+    if (r.status !== 'Benefício Liberado') return;
+    const k = r.indicador_email || r.indicador_nome;
+    if (!map[k]) map[k] = { nome: r.indicador_nome, email: r.indicador_email, validos: [] };
+    map[k].validos.push(r);
+  });
+
+  // For each indicador with 2+ valid, compute discounts (skip 1st, apply from 2nd)
+  const result = [];
+  Object.values(map).forEach(ind => {
+    if (ind.validos.length < 2) return; // 1st only → brinde, no discount
+    // Sort by data_matricula to determine order (earliest = 1st)
+    const sorted = [...ind.validos].sort((a, b) => {
+      const da = parseToISO(a.data_matricula) || '9999';
+      const db = parseToISO(b.data_matricula) || '9999';
+      return da < db ? -1 : da > db ? 1 : 0;
+    });
+    // Skip first (index 0), apply discount from index 1 onwards
+    const descDescontos = sorted.slice(1).map(r => ({
+      indicado_nome:  r.indicado_nome,
+      indicado_email: r.indicado_email,
+      nivel:          r.nivel || '—',
+      data_matricula: r.data_matricula,
+      pct:            descontoPct(r.nivel)
+    }));
+    result.push({
+      nome:          ind.nome,
+      email:         ind.email,
+      total_validos: ind.validos.length,
+      primeira:      sorted[0],
+      descontos:     descDescontos
+    });
+  });
+  // Sort by number of discounts desc
+  result.sort((a, b) => b.descontos.length - a.descontos.length || b.total_validos - a.total_validos);
+  return result;
+}
+
+function renderDescontos() {
+  if (!DATA.length) return;
+  const all = buildDescontoData();
+
+  // Search filter
+  const q = (document.getElementById('desc-search') || {}).value || '';
+  let filtered = all;
+  if (q.trim()) {
+    filtered = all.filter(x =>
+      (x.nome||'').toLowerCase().includes(q.toLowerCase()) ||
+      (x.email||'').toLowerCase().includes(q.toLowerCase())
+    );
+  }
+  // Status filter
+  if (descFilter !== 'todos') {
+    filtered = filtered.filter(x => x.descontos.some(d => d.pct === +descFilter));
+  }
+
+  // KPIs (always over full dataset)
+  const allDescontos = all.flatMap(x => x.descontos);
+  document.getElementById('desc-kpi-ind').textContent   = all.length;
+  document.getElementById('desc-kpi-total').textContent = allDescontos.length;
+  document.getElementById('desc-kpi-50').textContent    = allDescontos.filter(d => d.pct === 50).length;
+  document.getElementById('desc-kpi-30').textContent    = allDescontos.filter(d => d.pct === 30).length;
+
+  // Pagination
+  const total = filtered.length;
+  const pages = Math.ceil(total / DESC_PG) || 1;
+  descPage = Math.max(1, Math.min(descPage, pages));
+  const slice = filtered.slice((descPage-1)*DESC_PG, descPage*DESC_PG);
+
+  const ci = document.getElementById('desc-count');
+  if (ci) ci.textContent = `${total} indicador${total!==1?'es':''}`;
+  const pi = document.getElementById('desc-page-info');
+  if (pi) pi.textContent = `Página ${descPage} de ${pages}`;
+  const rp = document.getElementById('desc-prev'); if(rp) rp.disabled = descPage<=1;
+  const rn = document.getElementById('desc-next'); if(rn) rn.disabled = descPage>=pages;
+
+  const tbody = document.getElementById('desc-tbody');
+  if (!slice.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty" style="padding:40px"><div class="empty-icon">💸</div><p>Nenhum indicador elegível a desconto${q ? ' para "'+q+'"' : ''}</p></div></td></tr>`;
+    return;
+  }
+
+  const startIdx = (descPage-1)*DESC_PG;
+  tbody.innerHTML = slice.map((ind, i) => {
+    const rank = startIdx + i + 1;
+    // Build discount summary badges
+    const counts = {};
+    ind.descontos.forEach(d => { counts[d.pct] = (counts[d.pct]||0)+1; });
+    const badgeSummary = Object.entries(counts)
+      .sort((a,b) => b[0]-a[0])
+      .map(([pct, n]) => `${descontoLabel(+pct)} <span style="font-size:11px;color:var(--muted)">×${n}</span>`)
+      .join(' ');
+
+    // Detail rows
+    const details = ind.descontos.map((d, di) => {
+      const ordemLabel = di === 0 ? '2ª indicação' : `${di+2}ª indicação`;
+      return `<div class="desc-detail-row">
+        <strong>${ordemLabel}:</strong> ${cap(d.indicado_nome)} · <span style="color:var(--muted)">${d.nivel}</span> · mat. ${fmtDate(d.data_matricula)} → ${descontoLabel(d.pct)}
+      </div>`;
+    }).join('');
+
+    // 1st indicado note
+    const primeiraNote = `<div style="font-size:11px;color:var(--muted2);margin-top:4px">🎁 1ª: ${cap(ind.primeira.indicado_nome)} → apenas brinde</div>`;
+
+    return `<tr>
+      <td class="rank-num">${rank}</td>
+      <td class="tn">${cap(ind.nome)}</td>
+      <td class="te" style="font-size:11px">${ind.email||'—'}</td>
+      <td style="text-align:center;font-family:'DM Mono',monospace;font-size:15px;color:var(--green);font-weight:600">${ind.total_validos}</td>
+      <td style="min-width:200px">${badgeSummary}</td>
+      <td style="min-width:280px">${details}${primeiraNote}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportDescontos() {
+  const all = buildDescontoData();
+  if (!all.length) { alert('Nenhum dado para exportar.'); return; }
+  const lines = [
+    'Indicador Nome,Indicador Email,Total Válidos,Ordem,Indicado Nome,Indicado Email,Nível,Data Matrícula,Desconto %'
+  ];
+  all.forEach(ind => {
+    // 1st → brinde only
+    lines.push([
+      `"${ind.nome}"`,`"${ind.email}"`,ind.total_validos,
+      '1ª (brinde)',`"${ind.primeira.indicado_nome}"`,`"${ind.primeira.indicado_email}"`,
+      `"${ind.primeira.nivel||''}"`,`"${ind.primeira.data_matricula}"`,`0%`
+    ].join(','));
+    ind.descontos.forEach((d, di) => {
+      lines.push([
+        `"${ind.nome}"`,`"${ind.email}"`,ind.total_validos,
+        `${di+2}ª (desconto)`,`"${d.indicado_nome}"`,`"${d.indicado_email}"`,
+        `"${d.nivel||''}"`,`"${d.data_matricula}"`,`${d.pct}%`
+      ].join(','));
+    });
+  });
+  const blob = new Blob(['\uFEFF'+lines.join('\n')], { type:'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `descontos_parcelas_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ══ ANALYTICS ════════════════════════════════════════
