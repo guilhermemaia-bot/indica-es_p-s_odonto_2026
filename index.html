@@ -968,7 +968,8 @@ function descontoPill(email, nome, telefone) {
 function canReceiveBrinde(status) { return status === 'Benefício Liberado'; }
 function canReceiveDesconto(status) { return status === 'Benefício Liberado'; }
 function isAdminOrFinanceiro() { return SESSION && (SESSION.role==='admin'||SESSION.role==='financeiro'); }
-function isAdminOrColab() { return SESSION && (SESSION.role==='admin'||SESSION.role==='colab'); }
+function isAdminOrColab()      { return SESSION && (SESSION.role==='admin'||SESSION.role==='colab'); }
+function canMarkDesconto()     { return SESSION && SESSION.role==='admin'; } // somente admin marca desconto nas views de busca
 
 function btnEntrega(indicador_nome, indicador_email, indicado_nome, indicado_email, status, mode) {
   mode = mode || 'brinde';
@@ -1034,7 +1035,7 @@ function searchIndicado(){
       :'—'}</td>
     <td>${r.status==='Benefício Liberado'
       ? descontoPill(r.indicado_email,r.indicado_nome,r.indicado_tel||'')
-        +(isAdminOrFinanceiro()?'<br>'+btnEntrega(r.indicador_nome,r.indicador_email,r.indicado_nome,r.indicado_email,r.status,'desconto'):'')
+      +(canMarkDesconto()?'<br>'+btnEntrega(r.indicador_nome,r.indicador_email,r.indicado_nome,r.indicado_email,r.status,'desconto'):'')
       :'—'}</td>
   </tr>`).join('');
 }
@@ -1090,7 +1091,7 @@ function searchGeral(){
       const descontoTd = r.status==='Benefício Liberado'
         ? `<td>${descontoInddo
             ? `<div><span class="desconto-concedido">💰 Liberado</span><div class="entrega-info">Por <strong>${cap(descontoInddo.responsavel)}</strong>${descontoInddo.data?'<br>'+fmtDate(descontoInddo.data):''}</div></div>`
-            : isAdminOrFinanceiro()
+            : canMarkDesconto()
               ? `<div><span class="desconto-pendente">⏳ Pendente</span><br><button class="btn btn-sm btn-teal" style="margin-top:4px" onclick="abrirModal('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}','desconto')">💰 Marcar Desconto</button></div>`
               : `<span class="desconto-pendente">⏳ Pendente</span>`
           }</td>`
