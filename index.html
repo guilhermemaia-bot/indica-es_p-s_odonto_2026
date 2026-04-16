@@ -16,6 +16,7 @@
   --yellow:#f5a623;--yellow-dim:rgba(245,166,35,0.10);
   --red:#f05252;--red-dim:rgba(240,82,82,0.10);
   --purple:#a78bfa;--purple-dim:rgba(167,139,250,0.10);
+  --teal:#2dd4bf;--teal-dim:rgba(45,212,191,0.10);--teal-glow:rgba(45,212,191,0.2);
   --r:10px;--r-sm:6px;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
@@ -207,6 +208,17 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .section-card h3{font-size:14px;font-weight:600;margin-bottom:6px}
 .section-card p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
 
+.kpi-teal::after{background:var(--teal)}
+.kpi-teal .kpi-value{color:var(--teal)}
+.btn-teal{background:var(--teal);color:#0a1f1e;font-weight:600}
+.btn-teal:hover{background:#26b8a8}
+.user-avatar.financeiro{background:rgba(45,212,191,0.2);color:var(--teal)}
+.desconto-concedido{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;font-size:11px;background:var(--teal-dim);color:var(--teal);border:1px solid rgba(45,212,191,0.2);white-space:nowrap}
+.desconto-pendente{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;font-size:11px;background:rgba(255,255,255,0.04);color:var(--muted);border:1px solid var(--border);white-space:nowrap}
+.excecao-banner{background:rgba(240,82,82,0.08);border:1px solid rgba(240,82,82,0.25);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:16px;line-height:1.5}
+.modal-tabs{display:flex;gap:0;margin-bottom:20px;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden}
+.modal-tab{flex:1;padding:9px;font-size:13px;font-weight:500;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.modal-tab.active{background:var(--accent-dim);color:var(--accent)}
 .no-copy{user-select:none;-webkit-user-select:none}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -241,36 +253,58 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
-<!-- MODAL ENTREGA -->
+<!-- MODAL UNIFICADO -->
 <div class="modal-backdrop hidden" id="modal-entrega">
   <div class="modal">
-    <h3>🎁 Registrar Entrega de Brinde</h3>
+    <h3 id="modal-title">🎁 Registrar Entrega de Brinde</h3>
+    <div id="modal-excecao-banner" class="excecao-banner" style="display:none">
+      ⚠️ <strong>Modo exceção:</strong> este registro será feito sem validação automática. Use apenas quando autorizado.
+    </div>
     <div class="modal-sub" id="modal-beneficiario-info">—</div>
     <div class="modal-field">
-      <label>Quem retirou o brinde?</label>
+      <label>Quem recebeu o benefício?</label>
       <div id="modal-checkboxes" style="display:flex;flex-direction:column;gap:8px;margin-bottom:4px"></div>
     </div>
-    <div class="modal-field">
-      <label>Nome de quem entregou</label>
-      <input id="modal-entregador-nome" type="text" placeholder="Ex: Ana Lima">
+
+    <!-- CAMPOS BRINDE -->
+    <div id="modal-fields-brinde">
+      <div class="modal-field">
+        <label>Nome de quem entregou</label>
+        <input id="modal-entregador-nome" type="text" placeholder="Ex: Ana Lima">
+      </div>
+      <div class="modal-field">
+        <label>Unidade</label>
+        <select id="modal-entregador-unidade">
+          <option value="">Selecione a unidade...</option>
+          <option value="Araras">Araras</option>
+          <option value="Campinas">Campinas</option>
+          <option value="Grande Vitória">Grande Vitória</option>
+          <option value="Fortaleza">Fortaleza</option>
+          <option value="São Paulo">São Paulo</option>
+          <option value="Curitiba">Curitiba</option>
+          <option value="Brasília">Brasília</option>
+          <option value="Belo Horizonte">Belo Horizonte</option>
+          <option value="Rio de Janeiro">Rio de Janeiro</option>
+        </select>
+      </div>
     </div>
-    <div class="modal-field">
-      <label>Unidade</label>
-      <select id="modal-entregador-unidade">
-        <option value="">Selecione a unidade...</option>
-        <option value="Araras">Araras</option>
-        <option value="Campinas">Campinas</option>
-        <option value="Grande Vitória">Grande Vitória</option>
-        <option value="Fortaleza">Fortaleza</option>
-        <option value="São Paulo">São Paulo</option>
-        <option value="Curitiba">Curitiba</option>
-        <option value="Brasília">Brasília</option>
-        <option value="Belo Horizonte">Belo Horizonte</option>
-        <option value="Rio de Janeiro">Rio de Janeiro</option>
-      </select>
+
+    <!-- CAMPOS DESCONTO -->
+    <div id="modal-fields-desconto" style="display:none">
+      <div class="modal-field">
+        <label>Indicação referente ao desconto</label>
+        <select id="modal-indicacao-ref">
+          <option value="">Selecione a indicação...</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Responsável pela liberação</label>
+        <input id="modal-responsavel-nome" type="text" placeholder="Ex: Carlos Financeiro">
+      </div>
     </div>
+
     <div class="modal-actions">
-      <button class="btn btn-green" onclick="confirmarEntrega()" style="flex:1">✅ Confirmar Entrega</button>
+      <button class="btn btn-green" id="modal-confirm-btn" onclick="confirmarEntrega()" style="flex:1">✅ Confirmar</button>
       <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
     </div>
     <div id="modal-error" style="font-size:12px;color:var(--red);margin-top:10px;min-height:16px"></div>
@@ -295,8 +329,18 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <span class="nav-icon">🔍</span> Buscar Indicado
       </a>
       <div class="nav-section">Administração</div>
+      <a class="nav-item" id="nav-excecoes" onclick="showView('excecoes',this)" href="#">
+        <span class="nav-icon">⚠️</span> Registrar Exceção
+      </a>
       <a class="nav-item" id="nav-admin-tools" onclick="showView('admin-tools',this)" href="#">
         <span class="nav-icon">⚙️</span> Ferramentas Admin
+      </a>
+    </div>
+
+    <div id="nav-financeiro" style="display:none">
+      <div class="nav-section">Descontos</div>
+      <a class="nav-item" id="nav-excecoes-fin" onclick="showView('excecoes',this)" href="#">
+        <span class="nav-icon">💰</span> Registrar Desconto
       </a>
     </div>
 
@@ -331,11 +375,12 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
       <!-- DASHBOARD -->
       <div class="view" id="view-dashboard">
-        <div class="kpi-grid">
+        <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr)">
           <div class="kpi-card kpi-blue"><div class="kpi-label">Total de Indicações</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub">registros processados</div></div>
           <div class="kpi-card kpi-green"><div class="kpi-label">Benefícios Liberados</div><div class="kpi-value" id="kpi-lib">—</div><div class="kpi-sub">matrícula confirmada</div></div>
           <div class="kpi-card kpi-yellow"><div class="kpi-label">Aguardando Matrícula</div><div class="kpi-value" id="kpi-agu">—</div><div class="kpi-sub">indicados sem match</div></div>
           <div class="kpi-card kpi-purple"><div class="kpi-label">Brindes Entregues</div><div class="kpi-value" id="kpi-brinde">—</div><div class="kpi-sub">entregas registradas</div></div>
+          <div class="kpi-card kpi-teal"><div class="kpi-label">Descontos Liberados</div><div class="kpi-value" id="kpi-desconto">—</div><div class="kpi-sub">descontos concedidos</div></div>
         </div>
         <div class="table-wrap">
           <div class="table-header">
@@ -349,7 +394,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </div>
           <div class="tscroll">
             <table><thead><tr>
-              <th>Indicado</th><th>E-mail</th><th>Indicador</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>Brinde</th>
+              <th>Indicado</th><th>E-mail</th><th>Indicador</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>🎁 Brinde</th><th>💰 Desconto</th>
             </tr></thead><tbody id="dash-tbody"></tbody></table>
           </div>
           <div class="pagination">
@@ -375,9 +420,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <div class="table-header"><div><strong>Resultado</strong><div class="table-count" id="si-count">Digite para buscar</div></div></div>
           <div class="tscroll">
             <table><thead><tr>
-              <th>Indicado</th><th>E-mail</th><th>Indicador</th><th>E-mail Indicador</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>Brinde</th>
+              <th>Indicado</th><th>E-mail</th><th>Indicador</th><th>E-mail Indicador</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>🎁 Brinde</th><th>💰 Desconto</th>
             </tr></thead><tbody id="si-tbody">
-              <tr><td colspan="8"><div class="empty"><div class="empty-icon">🔍</div><p>Digite para pesquisar</p></div></td></tr>
+              <tr><td colspan="9"><div class="empty"><div class="empty-icon">🔍</div><p>Digite para pesquisar</p></div></td></tr>
             </tbody></table>
           </div>
         </div>
@@ -401,27 +446,72 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="view" id="view-admin-tools">
         <div class="section-card">
           <h3>📥 Importar Brindes Entregues (CSV)</h3>
-          <p>Importe um CSV com e-mails de quem já retirou o brinde. O arquivo deve ter uma coluna <strong>email</strong> e opcionalmente <strong>entregador</strong>, <strong>unidade</strong> e <strong>data</strong>.</p>
+          <p>Importe um CSV com e-mails de quem já retirou o brinde. O arquivo deve ter uma coluna <strong>email</strong> e opcionalmente <strong>entregador</strong>, <strong>unidade</strong>, <strong>nome</strong>, <strong>telefone</strong> e <strong>data</strong>.</p>
           <div class="upload-zone" id="import-zone">
             <input type="file" accept=".csv" onchange="importCSV(event)">
             <div style="font-size:28px;margin-bottom:8px">📂</div>
             <strong style="font-size:13px">Clique ou arraste o CSV aqui</strong>
-            <p>Formato: email, entregador, unidade, data</p>
+            <p>Formato: email, nome, telefone, entregador, unidade, data</p>
           </div>
           <div id="import-status" style="margin-top:12px;font-size:13px;color:var(--muted)"></div>
         </div>
         <div class="section-card">
-          <h3>📤 Exportar Registro de Entregas</h3>
-          <p>Baixe todos os registros de entrega de brindes em formato CSV.</p>
-          <button class="btn btn-primary" onclick="exportEntregas()">⬇️ Exportar CSV</button>
+          <h3>📤 Exportar Registros</h3>
+          <p>Baixe os registros de entregas ou descontos em CSV.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="exportEntregas()">⬇️ Exportar Brindes</button>
+            <button class="btn btn-teal" onclick="exportDescontos()">⬇️ Exportar Descontos</button>
+          </div>
         </div>
         <div class="section-card">
-          <h3>📋 Entregas Registradas</h3>
+          <h3>🎁 Entregas de Brinde Registradas</h3>
           <p id="entregas-count-admin" style="margin-bottom:12px">—</p>
           <div class="tscroll">
             <table id="entregas-table">
               <thead><tr><th>Beneficiário</th><th>E-mail</th><th>Tipo</th><th>Entregador</th><th>Unidade</th><th>Data</th><th>Ação</th></tr></thead>
               <tbody id="entregas-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="section-card">
+          <h3>💰 Descontos Liberados Registrados</h3>
+          <p id="descontos-count-admin" style="margin-bottom:12px">—</p>
+          <div class="tscroll">
+            <table>
+              <thead><tr><th>Beneficiário</th><th>E-mail</th><th>Indicação Ref.</th><th>Responsável</th><th>Data</th><th>Ação</th></tr></thead>
+              <tbody id="descontos-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXCEÇÕES -->
+      <div class="view" id="view-excecoes">
+        <div class="section-card" style="border-color:rgba(240,82,82,0.25)">
+          <h3>⚠️ Registro Manual por Exceção</h3>
+          <p>Use esta área para registrar entrega de brinde ou liberação de desconto para pessoas que não aparecem como "Benefício Liberado" no sistema, mas que foram autorizadas por outro motivo.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+            <button class="btn btn-danger" onclick="abrirModalExcecao('brinde')">🎁 Registrar Brinde por Exceção</button>
+            <button class="btn btn-teal" id="btn-excecao-desconto" onclick="abrirModalExcecao('desconto')" style="display:none">💰 Liberar Desconto por Exceção</button>
+          </div>
+        </div>
+        <div class="section-card">
+          <h3>🎁 Brindes Registrados (incluindo exceções)</h3>
+          <p id="entregas-count-admin-exc" style="margin-bottom:12px">—</p>
+          <div class="tscroll">
+            <table>
+              <thead><tr><th>Beneficiário</th><th>E-mail</th><th>Tipo</th><th>Entregador</th><th>Unidade</th><th>Data</th><th>Ação</th></tr></thead>
+              <tbody id="entregas-tbody-exc"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="section-card" id="descontos-excecao-card" style="display:none">
+          <h3>💰 Descontos Registrados (incluindo exceções)</h3>
+          <p id="descontos-count-admin-exc" style="margin-bottom:12px">—</p>
+          <div class="tscroll">
+            <table>
+              <thead><tr><th>Beneficiário</th><th>E-mail</th><th>Indicação Ref.</th><th>Responsável</th><th>Data</th><th>Ação</th></tr></thead>
+              <tbody id="descontos-tbody-exc"></tbody>
             </table>
           </div>
         </div>
@@ -434,8 +524,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <script>
 // ══ CONFIG ════════════════════════════════════════════
 const SENHAS = {
-  'admin2025': { role:'admin', label:'Administrador' },
-  'equipe2025': { role:'colab', label:'Colaborador' }
+  'admin2025':     { role:'admin',       label:'Administrador' },
+  'equipe2025':    { role:'colab',       label:'Colaborador'   },
+  'financeiro2025':{ role:'financeiro',  label:'Financeiro'    }
 };
 const APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKA35A5f3wYUFdggHTCAKlsbYmm_TgHsnDb0ofro9LSqk90Qg6Q7feQRBL_PgzvP-bxQ/exec';
 
@@ -445,12 +536,16 @@ let DATA    = [];   // processed indicações
 let ENTREGAS = {};  // primary index: email → entrega record
 let ENTREGAS_BY_NOME = {};  // secondary index: nome_normalizado → entrega record
 let ENTREGAS_BY_PHONE = {}; // tertiary index: phone digits → entrega record
+let DESCONTOS = {};         // primary index: email → desconto record
+let DESCONTOS_BY_NOME  = {};
+let DESCONTOS_BY_PHONE = {};
 let dashFilter = 'todos';
 let dashPage   = 1;
 const PG = 30;
 
 // Current modal context
-let modalCtx = null; // { indicador_email, indicador_nome, indicado_email, indicado_nome }
+let modalCtx = null; // { indicador_email, indicador_nome, indicado_email, indicado_nome, mode }
+// mode: 'brinde' | 'desconto' | 'excecao-brinde' | 'excecao-desconto'
 
 // ══ NORMALIZAÇÃO ══════════════════════════════════════
 function normalizeName(s) {
@@ -479,6 +574,52 @@ function buildEntregasIndexes() {
     const phoneKey = normalizePhone(e.telefone || '');
     if (phoneKey) ENTREGAS_BY_PHONE[phoneKey] = e;
   });
+}
+
+// ══ DESCONTOS — triple-match (email → nome → telefone) ════════════
+function buildDescontosIndexes() {
+  DESCONTOS_BY_NOME  = {};
+  DESCONTOS_BY_PHONE = {};
+  Object.values(DESCONTOS).forEach(d => {
+    const nomeKey = d.nome_normalizado || normalizeName(d.nome || '');
+    if (nomeKey) DESCONTOS_BY_NOME[nomeKey] = d;
+    const phoneKey = normalizePhone(d.telefone || '');
+    if (phoneKey) DESCONTOS_BY_PHONE[phoneKey] = d;
+  });
+}
+
+function getDesconto(email, nome, telefone) {
+  const emailKey = (email || '').toLowerCase().trim();
+  if (emailKey && DESCONTOS[emailKey]) return DESCONTOS[emailKey];
+  const nomeKey = normalizeName(nome || '');
+  if (nomeKey && DESCONTOS_BY_NOME[nomeKey]) return DESCONTOS_BY_NOME[nomeKey];
+  const phoneKey = normalizePhone(telefone || '');
+  if (phoneKey && DESCONTOS_BY_PHONE[phoneKey]) return DESCONTOS_BY_PHONE[phoneKey];
+  return null;
+}
+
+async function setDesconto(email, indicacaoRef, responsavel, nome) {
+  const key = (email || '').toLowerCase().trim();
+  if (!DESCONTOS[key]) DESCONTOS[key] = {
+    email: key, indicacoes: [], responsavel, nome: nome||'',
+    nome_normalizado: normalizeName(nome||''), data: new Date().toISOString()
+  };
+  if (!DESCONTOS[key].indicacoes.includes(indicacaoRef)) DESCONTOS[key].indicacoes.push(indicacaoRef);
+  DESCONTOS[key].responsavel = responsavel;
+  DESCONTOS[key].nome        = nome || '';
+  DESCONTOS[key].data        = new Date().toISOString();
+  buildDescontosIndexes();
+  try {
+    const params = new URLSearchParams({
+      action:      'saveDesconto',
+      email:       key,
+      indicacoes:  DESCONTOS[key].indicacoes.join('|'),
+      responsavel: responsavel,
+      nome:        nome || '',
+      data:        DESCONTOS[key].data
+    });
+    await fetch(APPS_SCRIPT + '?' + params.toString(), { mode: 'no-cors' });
+  } catch(err) { console.warn('Erro ao salvar desconto no Sheets:', err); }
 }
 
 // Triple-match: email → nome_normalizado → telefone
@@ -556,16 +697,31 @@ function doLogout() {
 
 // ══ UI SETUP ══════════════════════════════════════════
 function setupUI() {
-  const isAdmin = SESSION.role==='admin';
+  const isAdmin      = SESSION.role === 'admin';
+  const isFinanceiro = SESSION.role === 'financeiro';
+  const isColab      = SESSION.role === 'colab';
   const av = document.getElementById('user-avatar');
   av.textContent = SESSION.label[0];
   av.className = 'user-avatar ' + SESSION.role;
   document.getElementById('user-name').textContent = SESSION.label;
-  document.getElementById('user-role').textContent = isAdmin ? 'Acesso total' : 'Consulta + Entregas';
-  document.getElementById('nav-admin').style.display = isAdmin ? 'block' : 'none';
-  document.getElementById('sync-section').style.display = isAdmin ? 'block' : 'none';
-  if (isAdmin) { showView('dashboard', document.getElementById('nav-dashboard')); }
-  else { showView('consulta-geral', document.getElementById('nav-busca')); }
+  document.getElementById('user-role').textContent =
+    isAdmin      ? 'Acesso total' :
+    isFinanceiro ? 'Consulta + Descontos' :
+                   'Consulta + Entregas';
+
+  document.getElementById('nav-admin').style.display      = isAdmin      ? 'block' : 'none';
+  document.getElementById('nav-financeiro').style.display = isFinanceiro  ? 'block' : 'none';
+  document.getElementById('sync-section').style.display   = isAdmin      ? 'block' : 'none';
+
+  // Show/hide desconto button in excecoes view based on role
+  const btnExcDesc = document.getElementById('btn-excecao-desconto');
+  if (btnExcDesc) btnExcDesc.style.display = (isAdmin || isFinanceiro) ? 'inline-flex' : 'none';
+  const cardDescExc = document.getElementById('descontos-excecao-card');
+  if (cardDescExc) cardDescExc.style.display = (isAdmin || isFinanceiro) ? 'block' : 'none';
+
+  if (isAdmin)      { showView('dashboard', document.getElementById('nav-dashboard')); }
+  else if (isFinanceiro) { showView('excecoes', document.getElementById('nav-excecoes-fin')); }
+  else              { showView('consulta-geral', document.getElementById('nav-busca')); }
 }
 
 // ══ NAVIGATION ════════════════════════════════════════
@@ -574,6 +730,7 @@ const VIEW_META = {
   'consulta-indicado': ['Buscar Indicado','Pesquise pelo nome ou e-mail do indicado'],
   'consulta-geral':    ['Buscar Beneficiário','Pesquise por indicador ou indicado'],
   'admin-tools':       ['Ferramentas Admin','Importação e exportação de dados'],
+  'excecoes':          ['Registrar Exceção','Libere brinde ou desconto manualmente'],
 };
 function showView(v, el) {
   event && event.preventDefault();
@@ -584,7 +741,8 @@ function showView(v, el) {
   const [t,s]=VIEW_META[v]||['—',''];
   document.getElementById('topbar-title').textContent=t;
   document.getElementById('topbar-sub').textContent=s;
-  if(v==='admin-tools') renderEntregasAdmin();
+  if(v==='admin-tools') { renderEntregasAdmin(); renderDescontosAdmin(); }
+  if(v==='excecoes')    { renderExcecoesView(); }
 }
 
 // ══ CSV PARSER ════════════════════════════════════════
@@ -733,7 +891,6 @@ async function loadData(isRefresh) {
     const entregasArr = json.entregas || [];
     ENTREGAS = {};
     entregasArr.forEach(e => {
-      // Index by email (primary)
       const emailKey = (e.email || '').toLowerCase().trim();
       const record = {
         ...e,
@@ -741,12 +898,20 @@ async function loadData(isRefresh) {
         telefone: normalizePhone(e.telefone || '')
       };
       if (emailKey) ENTREGAS[emailKey] = record;
-      // Also index records that have no email (nome-only records)
-      else if (record.nome_normalizado) {
-        ENTREGAS['__nome__' + record.nome_normalizado] = record;
-      }
+      else if (record.nome_normalizado) ENTREGAS['__nome__' + record.nome_normalizado] = record;
     });
     buildEntregasIndexes();
+
+    // Load descontos from Sheets
+    const descontosArr = json.descontos || [];
+    DESCONTOS = {};
+    descontosArr.forEach(d => {
+      const emailKey = (d.email || '').toLowerCase().trim();
+      const record = { ...d, nome_normalizado: normalizeName(d.nome||''), telefone: normalizePhone(d.telefone||'') };
+      if (emailKey) DESCONTOS[emailKey] = record;
+      else if (record.nome_normalizado) DESCONTOS['__nome__' + record.nome_normalizado] = record;
+    });
+    buildDescontosIndexes();
 
     setProgress(70,'Processando...');
     const {rows:matRows}=parseCSV(matText);
@@ -777,9 +942,8 @@ function cap(s){if(!s)return '—';return s.split(' ').map(w=>w?w[0].toUpperCase
 function brindePill(email, nome, telefone) {
   const e = getEntrega(email, nome, telefone);
   if (e) {
-    // Show how the match was made (for transparency)
     const matchedBy = email && e.email === (email||'').toLowerCase().trim() ? ''
-      : nome && (e.nome_normalizado || normalizeName(e.nome||'')) === normalizeName(nome) ? ' <span style="font-size:10px;opacity:.6">(nome)</span>'
+      : nome && (e.nome_normalizado||normalizeName(e.nome||'')) === normalizeName(nome) ? ' <span style="font-size:10px;opacity:.6">(nome)</span>'
       : telefone ? ' <span style="font-size:10px;opacity:.6">(tel)</span>' : '';
     return `<div>
       <span class="brinde-entregue">🎁 Entregue${matchedBy}</span>
@@ -789,9 +953,29 @@ function brindePill(email, nome, telefone) {
   return `<span class="brinde-pendente">⏳ Pendente</span>`;
 }
 
-function btnEntrega(indicador_nome, indicador_email, indicado_nome, indicado_email, status) {
+function descontoPill(email, nome, telefone) {
+  const d = getDesconto(email, nome, telefone);
+  if (d) {
+    const refs = (d.indicacoes||[]).join(', ') || '—';
+    return `<div>
+      <span class="desconto-concedido">💰 Desconto liberado</span>
+      <div class="entrega-info">Por <strong>${cap(d.responsavel)}</strong> · Indicação: ${refs}<br>${fmtDate(d.data)}</div>
+    </div>`;
+  }
+  return `<span class="desconto-pendente">⏳ Pendente</span>`;
+}
+
+function canReceiveBrinde(status) { return status === 'Benefício Liberado'; }
+function canReceiveDesconto(status) { return status === 'Benefício Liberado'; }
+function isAdminOrFinanceiro() { return SESSION && (SESSION.role==='admin'||SESSION.role==='financeiro'); }
+function isAdminOrColab() { return SESSION && (SESSION.role==='admin'||SESSION.role==='colab'); }
+
+function btnEntrega(indicador_nome, indicador_email, indicado_nome, indicado_email, status, mode) {
+  mode = mode || 'brinde';
   if (status !== 'Benefício Liberado') return '';
-  return `<button class="btn btn-sm btn-primary" onclick="abrirModal('${esc(indicador_nome)}','${esc(indicador_email)}','${esc(indicado_nome)}','${esc(indicado_email)}')">🎁 Marcar Entrega</button>`;
+  const label = mode === 'desconto' ? '💰 Marcar Desconto' : '🎁 Marcar Entrega';
+  const cls   = mode === 'desconto' ? 'btn-teal' : 'btn-primary';
+  return `<button class="btn btn-sm ${cls}" onclick="abrirModal('${esc(indicador_nome)}','${esc(indicador_email)}','${esc(indicado_nome)}','${esc(indicado_email)}','${mode}')">${label}</button>`;
 }
 function esc(s){ return (s||'').replace(/'/g,"\\'"); }
 
@@ -801,6 +985,7 @@ function updateKPIs(){
   document.getElementById('kpi-lib').textContent=DATA.filter(r=>r.status==='Benefício Liberado').length;
   document.getElementById('kpi-agu').textContent=DATA.filter(r=>r.status==='Aguardando Matrícula').length;
   document.getElementById('kpi-brinde').textContent=Object.values(ENTREGAS).length;
+  document.getElementById('kpi-desconto').textContent=Object.values(DESCONTOS).length;
 }
 
 // ══ DASHBOARD ════════════════════════════════════════
@@ -824,6 +1009,7 @@ function renderDashTable(){
     <td class="td">${fmtDate(r.data_matricula)}</td>
     <td>${pill(r.status)}</td>
     <td>${r.status==='Benefício Liberado'?brindePill(r.indicado_email,r.indicado_nome,r.indicado_tel||''):'—'}</td>
+    <td>${r.status==='Benefício Liberado'?descontoPill(r.indicado_email,r.indicado_nome,r.indicado_tel||''):'—'}</td>
   </tr>`).join('');
 }
 function pageChange(dir){dashPage+=dir;renderDashTable();}
@@ -842,7 +1028,14 @@ function searchIndicado(){
     <td class="tn">${cap(r.indicador_nome)}</td><td class="te">${r.indicador_email||'—'}</td>
     <td class="td">${fmtDate(r.data_indicacao)}</td><td class="td">${fmtDate(r.data_matricula)}</td>
     <td>${pill(r.status)}</td>
-    <td>${r.status==='Benefício Liberado'?brindePill(r.indicado_email,r.indicado_nome,r.indicado_tel||'')+'<br>'+btnEntrega(r.indicador_nome,r.indicador_email,r.indicado_nome,r.indicado_email,r.status):'—'}</td>
+    <td>${r.status==='Benefício Liberado'
+      ? brindePill(r.indicado_email,r.indicado_nome,r.indicado_tel||'')
+        +'<br>'+btnEntrega(r.indicador_nome,r.indicador_email,r.indicado_nome,r.indicado_email,r.status,'brinde')
+      :'—'}</td>
+    <td>${r.status==='Benefício Liberado'
+      ? descontoPill(r.indicado_email,r.indicado_nome,r.indicado_tel||'')
+        +(isAdminOrFinanceiro()?'<br>'+btnEntrega(r.indicador_nome,r.indicador_email,r.indicado_nome,r.indicado_email,r.status,'desconto'):'')
+      :'—'}</td>
   </tr>`).join('');
 }
 
@@ -882,19 +1075,34 @@ function searchGeral(){
 
     const rows=g.list.map(r=>{
       const entregaInddo=getEntrega(r.indicado_email, r.indicado_nome, r.indicado_tel||'');
+      const descontoInddo=getDesconto(r.indicado_email, r.indicado_nome, r.indicado_tel||'');
       const highlight=g.matchedInddo.includes(r.indicado_email)?'background:rgba(79,142,247,0.05);':'';
+
       const brindeTd = r.status==='Benefício Liberado'
         ? `<td>${entregaInddo
             ? `<div><span class="brinde-entregue">🎁 Entregue</span><div class="entrega-info">Por <strong>${cap(entregaInddo.entregador)}</strong>${entregaInddo.unidade?' · '+cap(entregaInddo.unidade):''}${entregaInddo.data?'<br>'+fmtDate(entregaInddo.data):''}</div></div>`
-            : `<div><span class="brinde-pendente">⏳ Pendente</span><br><button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="abrirModal('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}')">🎁 Marcar Entrega</button></div>`
+            : isAdminOrColab()
+              ? `<div><span class="brinde-pendente">⏳ Pendente</span><br><button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="abrirModal('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}','brinde')">🎁 Marcar Entrega</button></div>`
+              : `<span class="brinde-pendente">⏳ Pendente</span>`
           }</td>`
         : '<td>—</td>';
+
+      const descontoTd = r.status==='Benefício Liberado'
+        ? `<td>${descontoInddo
+            ? `<div><span class="desconto-concedido">💰 Liberado</span><div class="entrega-info">Por <strong>${cap(descontoInddo.responsavel)}</strong>${descontoInddo.data?'<br>'+fmtDate(descontoInddo.data):''}</div></div>`
+            : isAdminOrFinanceiro()
+              ? `<div><span class="desconto-pendente">⏳ Pendente</span><br><button class="btn btn-sm btn-teal" style="margin-top:4px" onclick="abrirModal('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}','desconto')">💰 Marcar Desconto</button></div>`
+              : `<span class="desconto-pendente">⏳ Pendente</span>`
+          }</td>`
+        : '<td>—</td>';
+
       return `<tr style="${highlight}">
         <td class="tn no-copy">${cap(r.indicado_nome)}</td>
         <td class="td">${fmtDate(r.data_indicacao)}</td>
         <td class="td">${fmtDate(r.data_matricula)}</td>
         <td>${pill(r.status)}</td>
         ${brindeTd}
+        ${descontoTd}
       </tr>`;
     }).join('');
 
@@ -917,7 +1125,7 @@ function searchGeral(){
       </div>
       <div class="ind-body">
         <div class="tscroll">
-          <table><thead><tr><th>Indicado</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>Brinde Indicado</th></tr></thead>
+          <table><thead><tr><th>Indicado</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>🎁 Brinde</th><th>💰 Desconto</th></tr></thead>
           <tbody>${rows}</tbody></table>
         </div>
       </div>
@@ -927,21 +1135,34 @@ function searchGeral(){
 
 function toggleCard(id){document.getElementById(id).classList.toggle('open');}
 
-// ══ MODAL ENTREGA ════════════════════════════════════
-function abrirModal(indicador_nome, indicador_email, indicado_nome, indicado_email) {
-  modalCtx = { indicador_nome, indicador_email, indicado_nome, indicado_email };
-  
-  // Build info text
+// ══ MODAL UNIFICADO ══════════════════════════════════
+// mode: 'brinde' | 'desconto' | 'excecao-brinde' | 'excecao-desconto'
+function abrirModal(indicador_nome, indicador_email, indicado_nome, indicado_email, mode) {
+  mode = mode || 'brinde';
+  modalCtx = { indicador_nome, indicador_email, indicado_nome, indicado_email, mode };
+
+  const isBrinde   = mode === 'brinde'  || mode === 'excecao-brinde';
+  const isDesconto = mode === 'desconto' || mode === 'excecao-desconto';
+  const isExcecao  = mode.startsWith('excecao');
+
+  // Title & icon
+  document.getElementById('modal-title').textContent =
+    isBrinde   ? (isExcecao ? '⚠️ Exceção — Registrar Brinde'   : '🎁 Registrar Entrega de Brinde') :
+    isDesconto ? (isExcecao ? '⚠️ Exceção — Liberar Desconto'   : '💰 Registrar Liberação de Desconto') : '—';
+
+  // Warning banner for exceptions
+  document.getElementById('modal-excecao-banner').style.display = isExcecao ? 'block' : 'none';
+
+  // Info text
   let info = '';
-  if (indicador_nome || indicador_email) info += `<strong>Indicador:</strong> ${cap(indicador_nome)}<br>`;
-  if (indicado_nome || indicado_email) info += `<strong>Indicado:</strong> ${cap(indicado_nome)}<br>`;
+  if (indicador_nome||indicador_email) info += `<strong>Indicador:</strong> ${cap(indicador_nome)}<br>`;
+  if (indicado_nome ||indicado_email)  info += `<strong>Indicado:</strong> ${cap(indicado_nome)}<br>`;
   document.getElementById('modal-beneficiario-info').innerHTML = info || '—';
 
-  // Build checkboxes
+  // Who received (checkboxes)
   const boxes = [];
   if (indicador_email) boxes.push({ label: `Indicador — ${cap(indicador_nome)}`, email: indicador_email, key: 'indicador' });
-  if (indicado_email)  boxes.push({ label: `Indicado — ${cap(indicado_nome)}`,   email: indicado_email,  key: 'indicado' });
-  
+  if (indicado_email)  boxes.push({ label: `Indicado — ${cap(indicado_nome)}`,   email: indicado_email,  key: 'indicado'  });
   document.getElementById('modal-checkboxes').innerHTML = boxes.map(b => `
     <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
       <input type="checkbox" id="chk-${b.key}" value="${b.email}" checked style="accent-color:var(--accent);width:15px;height:15px">
@@ -949,8 +1170,35 @@ function abrirModal(indicador_nome, indicador_email, indicado_nome, indicado_ema
     </label>
   `).join('');
 
-  document.getElementById('modal-entregador-nome').value = '';
+  // Fields: brinde needs entregador+unidade; desconto needs indicacaoRef+responsavel
+  document.getElementById('modal-fields-brinde').style.display  = isBrinde   ? 'block' : 'none';
+  document.getElementById('modal-fields-desconto').style.display = isDesconto ? 'block' : 'none';
+
+  // Populate desconto dropdown with valid indicações if not exception
+  if (isDesconto) {
+    const refSelect = document.getElementById('modal-indicacao-ref');
+    refSelect.innerHTML = '<option value="">Selecione a indicação...</option>';
+    // Build options from DATA: indicações where this indicado appears as liberado
+    const email = indicado_email || '';
+    const opts = DATA.filter(r => r.indicado_email===email && r.status==='Benefício Liberado');
+    if (opts.length) {
+      opts.forEach((r,i) => {
+        const label = `Indicador: ${cap(r.indicador_nome)} — ${fmtDate(r.data_indicacao)}`;
+        refSelect.innerHTML += `<option value="${esc(r.indicador_nome+' ('+fmtDate(r.data_indicacao)+')')}">${label}</option>`;
+      });
+    } else {
+      refSelect.innerHTML += `<option value="excecao">Registro manual (exceção)</option>`;
+    }
+  }
+
+  // Confirm button color
+  const confirmBtn = document.getElementById('modal-confirm-btn');
+  confirmBtn.className = 'btn ' + (isExcecao ? 'btn-danger' : isBrinde ? 'btn-green' : 'btn-teal');
+  confirmBtn.textContent = isBrinde ? '✅ Confirmar Entrega' : '💰 Confirmar Desconto';
+
+  document.getElementById('modal-entregador-nome').value  = '';
   document.getElementById('modal-entregador-unidade').value = '';
+  document.getElementById('modal-responsavel-nome').value  = '';
   document.getElementById('modal-error').textContent = '';
   document.getElementById('modal-entrega').classList.remove('hidden');
 }
@@ -961,34 +1209,59 @@ function fecharModal() {
 }
 
 async function confirmarEntrega() {
-  const entregador = document.getElementById('modal-entregador-nome').value.trim();
-  const unidade    = document.getElementById('modal-entregador-unidade').value.trim();
-  const errEl      = document.getElementById('modal-error');
+  const errEl = document.getElementById('modal-error');
+  const mode = modalCtx ? modalCtx.mode : 'brinde';
+  const isBrinde   = mode === 'brinde'  || mode === 'excecao-brinde';
+  const isDesconto = mode === 'desconto' || mode === 'excecao-desconto';
+  const isExcecao  = mode.startsWith('excecao');
 
-  if (!entregador) { errEl.textContent = 'Informe o nome de quem entregou.'; return; }
-  if (!unidade)    { errEl.textContent = 'Informe a unidade.'; return; }
+  // For excecao modes: read email/nome from free-form fields and inject a virtual checkbox
+  if (isExcecao) {
+    const emailEl = document.getElementById('excecao-email');
+    const nomeEl  = document.getElementById('excecao-nome');
+    const excEmail = emailEl ? emailEl.value.trim().toLowerCase() : '';
+    const excNome  = nomeEl  ? nomeEl.value.trim() : '';
+    if (!excEmail && !excNome) {
+      errEl.textContent = 'Informe o e-mail ou nome do beneficiário.'; return;
+    }
+    modalCtx.indicado_email = excEmail;
+    modalCtx.indicado_nome  = excNome;
+    // Inject virtual hidden checkbox so the selected[] logic below picks it up
+    document.getElementById('modal-checkboxes').innerHTML =
+      `<input type="checkbox" id="chk-indicado" value="${excEmail}" checked style="display:none">`;
+  }
 
-  // Check which checkboxes are selected
-  const selected = [];
-  const chkInd  = document.getElementById('chk-indicador');
+  const chkInd   = document.getElementById('chk-indicador');
   const chkInddo = document.getElementById('chk-indicado');
-  if (chkInd  && chkInd.checked)  selected.push({ email: chkInd.value,  tipo: 'indicador', nome: modalCtx.indicador_nome });
-  if (chkInddo && chkInddo.checked) selected.push({ email: chkInddo.value, tipo: 'indicado',  nome: modalCtx.indicado_nome });
-
+  const selected = [];
+  if (chkInd   && chkInd.checked)   selected.push({ email: chkInd.value,   tipo:'indicador', nome: modalCtx.indicador_nome });
+  if (chkInddo && chkInddo.checked) selected.push({ email: chkInddo.value,  tipo: isExcecao ? 'excecao' : 'indicado', nome: modalCtx.indicado_nome });
   if (!selected.length) { errEl.textContent = 'Selecione ao menos um beneficiário.'; return; }
 
-  for (const s of selected) {
-    await setEntrega(s.email, s.tipo, entregador, unidade, s.nome);
+  if (isBrinde) {
+    const entregador = document.getElementById('modal-entregador-nome').value.trim();
+    const unidade    = document.getElementById('modal-entregador-unidade').value.trim();
+    if (!entregador) { errEl.textContent = 'Informe o nome de quem entregou.'; return; }
+    if (!unidade)    { errEl.textContent = 'Informe a unidade.'; return; }
+    for (const s of selected) await setEntrega(s.email, s.tipo, entregador, unidade, s.nome);
+  }
+
+  if (isDesconto) {
+    const responsavel  = document.getElementById('modal-responsavel-nome').value.trim();
+    const indicacaoRef = document.getElementById('modal-indicacao-ref').value.trim();
+    if (!responsavel)  { errEl.textContent = 'Informe o nome do responsável.'; return; }
+    if (!indicacaoRef) { errEl.textContent = 'Selecione a indicação referente.'; return; }
+    for (const s of selected) await setDesconto(s.email, indicacaoRef, responsavel, s.nome);
   }
 
   fecharModal();
   updateKPIs();
-  // Refresh current view
   const activeView = document.querySelector('.view.active');
-  if (activeView && activeView.id === 'view-consulta-geral') searchGeral();
+  if (activeView && activeView.id === 'view-consulta-geral')    searchGeral();
   if (activeView && activeView.id === 'view-consulta-indicado') searchIndicado();
-  if (activeView && activeView.id === 'view-dashboard') renderDashTable();
-  if (activeView && activeView.id === 'view-admin-tools') renderEntregasAdmin();
+  if (activeView && activeView.id === 'view-dashboard')         renderDashTable();
+  if (activeView && activeView.id === 'view-admin-tools')       { renderEntregasAdmin(); renderDescontosAdmin(); }
+  if (activeView && activeView.id === 'view-excecoes')          renderExcecoesView();
 }
 
 // ══ ADMIN TOOLS ══════════════════════════════════════
@@ -1012,15 +1285,43 @@ function renderEntregasAdmin() {
   }).join('');
 }
 
+function renderDescontosAdmin() {
+  const allRecords = Object.values(DESCONTOS);
+  const count = allRecords.length;
+  document.getElementById('descontos-count-admin').textContent = `${count} desconto${count!==1?'s':''} registrado${count!==1?'s':''}`;
+  const tbody = document.getElementById('descontos-tbody');
+  if (!count) { tbody.innerHTML='<tr><td colspan="6"><div class="empty" style="padding:24px"><div class="empty-icon">📭</div><p>Nenhum desconto registrado</p></div></td></tr>'; return; }
+  tbody.innerHTML = allRecords.map(d => {
+    const displayKey = d.email || d.nome_normalizado || '—';
+    return `<tr>
+      <td class="tn">${d.nome||displayKey}</td>
+      <td class="te" style="font-size:11px">${d.email||'<span style="color:var(--muted2)">sem e-mail</span>'}</td>
+      <td style="font-size:12px">${(d.indicacoes||[]).join('<br>')}</td>
+      <td>${cap(d.responsavel)}</td>
+      <td class="td">${fmtDate(d.data)}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="removerDesconto('${esc(displayKey)}')">Remover</button></td>
+    </tr>`;
+  }).join('');
+}
+
 function removerEntrega(key) {
   if (!confirm(`Remover registro de entrega para ${key}?`)) return;
-  // Try email key first, then __nome__ key
   const emailKey = getEntregaKey(key);
   if (ENTREGAS[emailKey]) delete ENTREGAS[emailKey];
   else if (ENTREGAS['__nome__' + normalizeName(key)]) delete ENTREGAS['__nome__' + normalizeName(key)];
   buildEntregasIndexes();
   updateKPIs();
   renderEntregasAdmin();
+}
+
+function removerDesconto(key) {
+  if (!confirm(`Remover desconto para ${key}?`)) return;
+  const emailKey = (key||'').toLowerCase().trim();
+  if (DESCONTOS[emailKey]) delete DESCONTOS[emailKey];
+  else if (DESCONTOS['__nome__' + normalizeName(key)]) delete DESCONTOS['__nome__' + normalizeName(key)];
+  buildDescontosIndexes();
+  updateKPIs();
+  renderDescontosAdmin();
 }
 
 function exportEntregas() {
@@ -1033,6 +1334,19 @@ function exportEntregas() {
   const blob = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download='entregas_brindes.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportDescontos() {
+  const allRecords = Object.values(DESCONTOS);
+  if (!allRecords.length) { alert('Nenhum desconto para exportar.'); return; }
+  const lines = ['email,indicacoes,responsavel,nome,data'];
+  allRecords.forEach(d => {
+    lines.push(`"${d.email||''}","${(d.indicacoes||[]).join('|')}","${d.responsavel||''}","${d.nome||''}","${d.data||''}"`);
+  });
+  const blob = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='descontos_liberados.csv'; a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -1054,20 +1368,10 @@ function importCSV(event) {
         const unidade    = row['unidade']||row['Unidade']||'';
         const data       = row['data']||row['Data']||new Date().toISOString();
         const nomeNorm   = normalizeName(nome);
-
         if (!email && !nomeNorm) continue;
-
-        const record = {
-          email, tipos: ['retroativo'], entregador, unidade, data,
-          nome, telefone, nome_normalizado: nomeNorm
-        };
-
-        if (email) {
-          if (!ENTREGAS[email]) { ENTREGAS[email] = record; count++; }
-        } else {
-          const nomeKey = '__nome__' + nomeNorm;
-          if (!ENTREGAS[nomeKey]) { ENTREGAS[nomeKey] = record; count++; }
-        }
+        const record = { email, tipos:['retroativo'], entregador, unidade, data, nome, telefone, nome_normalizado:nomeNorm };
+        if (email) { if (!ENTREGAS[email]) { ENTREGAS[email]=record; count++; } }
+        else { const nk='__nome__'+nomeNorm; if(!ENTREGAS[nk]){ ENTREGAS[nk]=record; count++; } }
       }
       buildEntregasIndexes();
       updateKPIs();
@@ -1082,7 +1386,101 @@ function importCSV(event) {
   reader.readAsText(file, 'UTF-8');
 }
 
-// ══ SECURITY ════════════════════════════════════════
+// ══ EXCEÇÕES ═════════════════════════════════════════
+function abrirModalExcecao(tipo) {
+  const mode = tipo === 'desconto' ? 'excecao-desconto' : 'excecao-brinde';
+  modalCtx = { indicador_nome:'', indicador_email:'', indicado_nome:'', indicado_email:'', mode };
+
+  document.getElementById('modal-title').textContent =
+    tipo === 'desconto' ? '⚠️ Exceção — Liberar Desconto' : '⚠️ Exceção — Registrar Brinde';
+  document.getElementById('modal-excecao-banner').style.display = 'block';
+
+  document.getElementById('modal-beneficiario-info').innerHTML =
+    `<div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px">E-mail do beneficiário</label>
+      <input id="excecao-email" type="email" placeholder="email@exemplo.com" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px;outline:none">
+    </div>
+    <div>
+      <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px">Nome do beneficiário</label>
+      <input id="excecao-nome" type="text" placeholder="Nome completo" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px;outline:none">
+    </div>`;
+
+  document.getElementById('modal-checkboxes').innerHTML = '';
+  document.getElementById('modal-fields-brinde').style.display   = tipo === 'brinde'   ? 'block' : 'none';
+  document.getElementById('modal-fields-desconto').style.display = tipo === 'desconto' ? 'block' : 'none';
+
+  if (tipo === 'desconto') {
+    const refSelect = document.getElementById('modal-indicacao-ref');
+    refSelect.innerHTML = '<option value="excecao-manual">Registro manual (exceção)</option>';
+  }
+
+  const confirmBtn = document.getElementById('modal-confirm-btn');
+  confirmBtn.className = 'btn btn-danger';
+  confirmBtn.textContent = tipo === 'desconto' ? '⚠️ Confirmar Desconto (Exceção)' : '⚠️ Confirmar Brinde (Exceção)';
+
+  document.getElementById('modal-entregador-nome').value   = '';
+  document.getElementById('modal-entregador-unidade').value = '';
+  document.getElementById('modal-responsavel-nome').value  = '';
+  document.getElementById('modal-error').textContent = '';
+  document.getElementById('modal-entrega').classList.remove('hidden');
+}
+
+function renderExcecoesView() {
+  const isFinanceiro = SESSION && SESSION.role === 'financeiro';
+  const isAdmin      = SESSION && SESSION.role === 'admin';
+
+  const btnDesc  = document.getElementById('btn-excecao-desconto');
+  const cardDesc = document.getElementById('descontos-excecao-card');
+  if (btnDesc)  btnDesc.style.display  = (isAdmin||isFinanceiro) ? 'inline-flex' : 'none';
+  if (cardDesc) cardDesc.style.display = (isAdmin||isFinanceiro) ? 'block'       : 'none';
+
+  // Render brindes table
+  const allEntregas = Object.values(ENTREGAS);
+  const eCount = allEntregas.length;
+  const eCountEl = document.getElementById('entregas-count-admin-exc');
+  if (eCountEl) eCountEl.textContent = `${eCount} entrega${eCount!==1?'s':''} registrada${eCount!==1?'s':''}`;
+  const eTbody = document.getElementById('entregas-tbody-exc');
+  if (eTbody) {
+    eTbody.innerHTML = !eCount
+      ? '<tr><td colspan="7"><div class="empty" style="padding:24px"><div class="empty-icon">📭</div><p>Nenhuma entrega registrada</p></div></td></tr>'
+      : allEntregas.map(e => {
+          const dk = e.email || e.nome_normalizado || '—';
+          return `<tr>
+            <td class="tn">${e.nome||dk}</td>
+            <td class="te" style="font-size:11px">${e.email||'<span style="color:var(--muted2)">sem e-mail</span>'}</td>
+            <td>${(e.tipos||[]).join(', ')}</td>
+            <td>${cap(e.entregador)}</td>
+            <td>${cap(e.unidade)||'—'}</td>
+            <td class="td">${fmtDate(e.data)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="removerEntrega('${esc(dk)}')">Remover</button></td>
+          </tr>`;
+        }).join('');
+  }
+
+  if (!isAdmin && !isFinanceiro) return;
+
+  // Render descontos table
+  const allDescontos = Object.values(DESCONTOS);
+  const dCount = allDescontos.length;
+  const dCountEl = document.getElementById('descontos-count-admin-exc');
+  if (dCountEl) dCountEl.textContent = `${dCount} desconto${dCount!==1?'s':''} registrado${dCount!==1?'s':''}`;
+  const dTbody = document.getElementById('descontos-tbody-exc');
+  if (dTbody) {
+    dTbody.innerHTML = !dCount
+      ? '<tr><td colspan="6"><div class="empty" style="padding:24px"><div class="empty-icon">📭</div><p>Nenhum desconto registrado</p></div></td></tr>'
+      : allDescontos.map(d => {
+          const dk = d.email || d.nome_normalizado || '—';
+          return `<tr>
+            <td class="tn">${d.nome||dk}</td>
+            <td class="te" style="font-size:11px">${d.email||'<span style="color:var(--muted2)">sem e-mail</span>'}</td>
+            <td style="font-size:12px">${(d.indicacoes||[]).join('<br>')}</td>
+            <td>${cap(d.responsavel)}</td>
+            <td class="td">${fmtDate(d.data)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="removerDesconto('${esc(dk)}')">Remover</button></td>
+          </tr>`;
+        }).join('');
+  }
+}
 document.addEventListener('contextmenu', e=>{ if(SESSION&&SESSION.role==='colab') e.preventDefault(); });
 document.addEventListener('keydown', e=>{ if(SESSION&&SESSION.role==='colab'&&(e.ctrlKey||e.metaKey)&&['s','p','u'].includes(e.key.toLowerCase())) e.preventDefault(); });
 </script>
