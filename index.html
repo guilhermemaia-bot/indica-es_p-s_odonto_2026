@@ -862,6 +862,20 @@ function todayISO() {
   return t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
 }
 
+// ── Helpers de deduplicação ───────────────────────────────────────────────
+// Normaliza nome: minúsculo, sem acento, sem espaços duplos
+function normName(s) {
+  return (s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/\s+/g,' ').trim();
+}
+// Chave de deduplicação: preferir e-mail; se ausente, usar nome normalizado
+function dedupKey(email, nome) {
+  const e = (email||'').toLowerCase().trim();
+  if (e && e.includes('@')) return 'email:' + e;
+  return 'nome:' + normName(nome);
+}
+
 function processData(matRows, indRows) {
   const matMap = {};
   for (const m of matRows) {
@@ -962,7 +976,35 @@ function processData(matRows, indRows) {
       });
     }
   }
-  return result;
+
+  // ── Deduplicação global ───────────────────────────────────────────────────
+  // Mesmo indicado pode aparecer em múltiplos slots ou múltiplos formulários
+  // do mesmo indicador. Mantemos apenas 1 registro por par (indicador × indicado),
+  // preferindo o com status mais favorável e, em empate, a matrícula mais recente.
+  const STATUS_RANK = { 'Benefício Liberado':4, 'Curso Não Iniciado':3, 'Regra de Data Inválida':2, 'Aguardando Matrícula':1 };
+  const seen = {}; // chave: indicador_email+':'+dedupKey(indicado)
+  const deduped = [];
+  for (const r of result) {
+    const indKey = (r.indicador_email || r.indicador_nome).toLowerCase();
+    const indadoKey = dedupKey(r.indicado_email, r.indicado_nome);
+    const k = indKey + '||' + indadoKey;
+    if (!seen[k]) {
+      seen[k] = r;
+      deduped.push(r);
+    } else {
+      const prev = seen[k];
+      const prevRank = STATUS_RANK[prev.status] || 0;
+      const curRank  = STATUS_RANK[r.status]    || 0;
+      // Substituir se status mais favorável, ou mesmo status com matrícula mais recente
+      if (curRank > prevRank ||
+         (curRank === prevRank && (parseToISO(r.data_matricula)||'') > (parseToISO(prev.data_matricula)||''))) {
+        const idx = deduped.indexOf(prev);
+        deduped[idx] = r;
+        seen[k] = r;
+      }
+    }
+  }
+  return deduped;
 }
 
 // ══ LOAD DATA ════════════════════════════════════════
@@ -1365,16 +1407,32 @@ function buildDescontoData() {
   DATA.forEach(r => {
     if (r.status !== 'Benefício Liberado') return;
     const k = r.indicador_email || r.indicador_nome;
-    if (!map[k]) map[k] = { nome: r.indicador_nome, email: r.indicador_email, validos: [] };
-    map[k].validos.push(r);
+    if (!map[k]) map[k] = { nome: r.indicador_nome, email: r.indicador_email, byIndicado: {} };
+
+    // Deduplicar por chave do indicado (e-mail ou nome normalizado)
+    // Se o mesmo indicado aparecer mais de uma vez, manter o registro com
+    // data de matrícula mais recente (para não contar duplicatas como 2 pessoas)
+    const dk = dedupKey(r.indicado_email, r.indicado_nome);
+    const existing = map[k].byIndicado[dk];
+    if (!existing) {
+      map[k].byIndicado[dk] = r;
+    } else {
+      // Manter o mais recente
+      const dExist = parseToISO(existing.data_matricula) || '';
+      const dNew   = parseToISO(r.data_matricula) || '';
+      if (dNew > dExist) map[k].byIndicado[dk] = r;
+    }
   });
 
   const result = [];
   Object.values(map).forEach(ind => {
-    if (ind.validos.length < 2) return; // só 1 indicado válido → apenas brinde, sem desconto
+    // Lista deduplicada de indicados válidos
+    const validos = Object.values(ind.byIndicado);
+
+    if (validos.length < 2) return; // só 1 indicado único → apenas brinde, sem desconto
 
     // Ordenar por data de matrícula (mais antiga = 1ª)
-    const sorted = [...ind.validos].sort((a, b) => {
+    const sorted = validos.sort((a, b) => {
       const da = parseToISO(a.data_matricula) || '9999';
       const db = parseToISO(b.data_matricula) || '9999';
       return da < db ? -1 : da > db ? 1 : 0;
@@ -1399,7 +1457,7 @@ function buildDescontoData() {
     result.push({
       nome:          ind.nome,
       email:         ind.email,
-      total_validos: ind.validos.length,
+      total_validos: validos.length,
       primeira:      sorted[0],
       descontos
     });
