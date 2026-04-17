@@ -1537,6 +1537,7 @@ function exportEntregas() {
   const a = document.createElement('a'); a.href=url; a.download='entregas_brindes.csv'; a.click();
   URL.revokeObjectURL(url);
 }
+function importCSV(event) {
   const file = event.target.files[0];
   if (!file) return;
   const statusEl = document.getElementById('import-status');
