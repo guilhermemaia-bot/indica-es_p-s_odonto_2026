@@ -961,7 +961,12 @@ function processData(matRows, indRows) {
   com2mais.forEach(x => console.log('  ->', x.nome, '| válidas:', x.validas));
   console.log('[MGM] Indicadores com exatamente 1 indicação válida:', com1.length);
   console.log('[MGM] Indicadores com 0 indicações válidas (indicações antigas):', com0.length);
-  com0.forEach(x => console.log('  -> (sem válidas)', x.nome, '| inválidas:', x.invalidas));
+  // After processing, show what beneficio_mgm was assigned to these 6
+  setTimeout(() => {
+    const comDesconto = DATA.filter(r => r.beneficio_mgm === 'desconto');
+    console.log('[MGM] Rows with beneficio_mgm=desconto after processing:', comDesconto.length);
+    comDesconto.forEach(r => console.log('  -> indicador:', r.indicador_nome, '| indicado:', r.indicado_nome, '| pct:', r.desconto_pct));
+  }, 500);
 
   const byIndicador = {};
   result.forEach(r => {
@@ -980,11 +985,11 @@ function processData(matRows, indRows) {
       indicado_email: r.indicado_email
     })));
     // Write back seq and beneficio to each result row
+    // Use indicado_email as key (date comparison was too strict — format variations cause misses)
     beneficios.forEach(b => {
       const row = result.find(r =>
         r.indicador_email === email &&
-        r.indicado_email === b.indicado_email &&
-        r.data_indicacao === b.data_indicacao
+        r.indicado_email === b.indicado_email
       );
       if (row) {
         row.seq_mgm        = b.seq;
@@ -992,6 +997,8 @@ function processData(matRows, indRows) {
         row.desconto_pct   = b.desconto_pct;
         row.parcelas_desc  = b.parcelas;
         row.nivel_curso    = b.nivel;
+      } else {
+        console.warn('[MGM] write-back miss:', email, '->', b.indicado_email, b.beneficio);
       }
     });
   });
