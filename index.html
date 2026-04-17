@@ -823,7 +823,7 @@ const VIEW_META = {
   'financeiro':        ['Painel Financeiro','Indicadores com direito a desconto em parcela'],
 };
 function showView(v, el) {
-  event && event.preventDefault();
+  try { event && event.preventDefault(); } catch(e) {}
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   const viewEl = document.getElementById('view-'+v);
   if (viewEl) viewEl.classList.add('active');
@@ -944,6 +944,25 @@ function processData(matRows, indRows) {
 
   // ── Compute per-indicador MGM benefits ──
   // Group valid MGM indicações by indicador
+  // DIAGNOSTIC: summary of MGM valid indicações per indicador
+  const liberados = result.filter(r => r.status === 'Benefício Liberado');
+  console.log('[MGM] Total Benefício Liberado:', liberados.length);
+  const mgmSummary = {};
+  liberados.forEach(r => {
+    const valid = isValidaMGM(r.data_indicacao, r.data_matricula);
+    if (!mgmSummary[r.indicador_email]) mgmSummary[r.indicador_email] = { nome: r.indicador_nome, validas: 0, invalidas: 0 };
+    if (valid) mgmSummary[r.indicador_email].validas++;
+    else mgmSummary[r.indicador_email].invalidas++;
+  });
+  const com2mais = Object.values(mgmSummary).filter(x => x.validas >= 2);
+  const com1 = Object.values(mgmSummary).filter(x => x.validas === 1);
+  const com0 = Object.values(mgmSummary).filter(x => x.validas === 0);
+  console.log('[MGM] Indicadores com 2+ indicações válidas (têm direito a desconto):', com2mais.length);
+  com2mais.forEach(x => console.log('  ->', x.nome, '| válidas:', x.validas));
+  console.log('[MGM] Indicadores com exatamente 1 indicação válida:', com1.length);
+  console.log('[MGM] Indicadores com 0 indicações válidas (indicações antigas):', com0.length);
+  com0.forEach(x => console.log('  -> (sem válidas)', x.nome, '| inválidas:', x.invalidas));
+
   const byIndicador = {};
   result.forEach(r => {
     if (!isValidaMGM(r.data_indicacao, r.data_matricula)) return;
