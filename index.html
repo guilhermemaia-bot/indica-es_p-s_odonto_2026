@@ -297,6 +297,14 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <option value="">Selecione a indicação...</option>
         </select>
       </div>
+      <div class="modal-field" id="modal-field-motivo" style="display:none">
+        <label>Motivo da exceção</label>
+        <input id="modal-motivo" type="text" placeholder="Descreva o motivo da liberação manual...">
+      </div>
+      <div class="modal-field">
+        <label>Mês/Ano da parcela</label>
+        <input id="modal-mes-ano" type="month" style="color-scheme:dark">
+      </div>
       <div class="modal-field">
         <label>Responsável pela liberação</label>
         <input id="modal-responsavel-nome" type="text" placeholder="Ex: Carlos Financeiro">
@@ -332,6 +340,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <a class="nav-item" id="nav-excecoes" onclick="showView('excecoes',this)" href="#">
         <span class="nav-icon">⚠️</span> Registrar Exceção
       </a>
+      <a class="nav-item" id="nav-fin-admin" onclick="showView('financeiro',this)" href="#">
+        <span class="nav-icon">💰</span> Painel Financeiro
+      </a>
       <a class="nav-item" id="nav-admin-tools" onclick="showView('admin-tools',this)" href="#">
         <span class="nav-icon">⚙️</span> Ferramentas Admin
       </a>
@@ -339,8 +350,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
     <div id="nav-financeiro" style="display:none">
       <div class="nav-section">Descontos</div>
-      <a class="nav-item" id="nav-excecoes-fin" onclick="showView('excecoes',this)" href="#">
-        <span class="nav-icon">💰</span> Registrar Desconto
+      <a class="nav-item" id="nav-fin-painel" onclick="showView('financeiro',this)" href="#">
+        <span class="nav-icon">💰</span> Painel de Descontos
       </a>
     </div>
 
@@ -517,18 +528,98 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </div>
       </div>
 
+      <!-- PAINEL FINANCEIRO -->
+      <div class="view" id="view-financeiro">
+        <div class="search-box" style="margin-bottom:20px">
+          <span class="search-label">Indicadores com Direito a Desconto em Parcela</span>
+          <p style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.6">
+            Lista automática baseada nas regras do MGM 2.0. Apenas indicações válidas (data ≥ 20/03/2026, matrícula após indicação) com 2ª indicação ou mais são exibidas aqui.
+          </p>
+        </div>
+        <div id="fin-results">
+          <div class="empty"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
-
 <script>
 // ══ CONFIG ════════════════════════════════════════════
 const SENHAS = {
-  'admin2025':     { role:'admin',       label:'Administrador' },
-  'equipe2025':    { role:'colab',       label:'Colaborador'   },
-  'financeiro2025':{ role:'financeiro',  label:'Financeiro'    }
+  'admin2025':      { role:'admin',       label:'Administrador',    unidade:'' },
+  'financeiro2025': { role:'financeiro',  label:'Financeiro',       unidade:'' },
+  'araras2025':     { role:'colab',       label:'Equipe Araras',    unidade:'Araras' },
+  'campinas2025':   { role:'colab',       label:'Equipe Campinas',  unidade:'Campinas' },
+  'vitoria2025':    { role:'colab',       label:'Equipe Gde Vitória', unidade:'Grande Vitória' },
+  'fortaleza2025':  { role:'colab',       label:'Equipe Fortaleza', unidade:'Fortaleza' },
+  'saopaulo2025':   { role:'colab',       label:'Equipe São Paulo', unidade:'São Paulo' },
+  'curitiba2025':   { role:'colab',       label:'Equipe Curitiba',  unidade:'Curitiba' },
+  'brasilia2025':   { role:'colab',       label:'Equipe Brasília',  unidade:'Brasília' },
+  'bh2025':         { role:'colab',       label:'Equipe BH',        unidade:'Belo Horizonte' },
+  'rio2025':        { role:'colab',       label:'Equipe Rio',       unidade:'Rio de Janeiro' }
 };
 const APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKA35A5f3wYUFdggHTCAKlsbYmm_TgHsnDb0ofro9LSqk90Qg6Q7feQRBL_PgzvP-bxQ/exec';
+
+// ══ REGRAS MGM 2.0 ════════════════════════════════════
+const MGM_INICIO = '2026-03-20'; // data mínima de indicação para valer
+
+// Nível do curso → percentual de desconto para o indicador
+function nivelCurso(tipoCurso) {
+  const t = (tipoCurso||'').trim().toLowerCase();
+  if (t === 'mestrado profissional' || t === 'mestrado' || t === 'doutorado' || t === 'programa pós doutorado') return 'alto';
+  if (t === 'especialização') return 'medio';
+  return 'baixo'; // imersão, atualização, aperfeiçoamento, habilitação, etc.
+}
+function pctDesconto(tipoCurso) {
+  const n = nivelCurso(tipoCurso);
+  return n === 'alto' ? 50 : n === 'medio' ? 30 : 10;
+}
+// Indicação válida para MGM 2.0: data indicação >= 20/03/2026 E data matrícula >= data indicação
+function isValidaMGM(data_indicacao, data_matricula) {
+  const px = d => {
+    if (!d) return null;
+    let m = d.match(/^(\d{2})\/(\d{2})\/(\d{2,4})/);
+    if (m) { const yr = m[3].length===2?'20'+m[3]:m[3]; return yr+'-'+m[2]+'-'+m[1]; }
+    m = d.match(/^(\d{4}-\d{2}-\d{2})/); if (m) return m[1];
+    const p = new Date(d); if (!isNaN(p)) return p.toISOString().slice(0,10);
+    return null;
+  };
+  const dI = px(data_indicacao), dM = px(data_matricula);
+  if (!dI || !dM) return false;
+  return dI >= MGM_INICIO && dM >= dI;
+}
+// Direito a BRINDE: 1ª indicação válida — Especialização, Mestrado ou Doutorado
+function temDireitoBrinde(tipoCurso) {
+  const n = nivelCurso(tipoCurso);
+  return n === 'alto' || n === 'medio'; // especialização, mestrado, doutorado
+}
+// Computa benefícios do indicador dado todas as suas indicações válidas ordenadas
+function computaBeneficios(validasOrdenadas) {
+  // validasOrdenadas: array de { data_indicacao, data_matricula, tipo_curso, indicado_nome, indicado_email }
+  // ordenado por data_indicacao ASC
+  const resultado = [];
+  validasOrdenadas.forEach((ind, idx) => {
+    const seq = idx + 1; // 1ª, 2ª, 3ª...
+    const pct = pctDesconto(ind.tipo_curso);
+    const nivel = nivelCurso(ind.tipo_curso);
+    if (seq === 1) {
+      resultado.push({
+        ...ind, seq,
+        beneficio: temDireitoBrinde(ind.tipo_curso) ? 'brinde' : 'nenhum',
+        desconto_pct: 0, parcelas: 0
+      });
+    } else {
+      // A partir da 2ª: desconto em (seq-1) parcelas
+      resultado.push({
+        ...ind, seq,
+        beneficio: 'desconto',
+        desconto_pct: pct, parcelas: seq - 1, nivel
+      });
+    }
+  });
+  return resultado;
+}
 
 // ══ STATE ════════════════════════════════════════════
 let SESSION = null;
@@ -706,22 +797,22 @@ function setupUI() {
   document.getElementById('user-name').textContent = SESSION.label;
   document.getElementById('user-role').textContent =
     isAdmin      ? 'Acesso total' :
-    isFinanceiro ? 'Consulta + Descontos' :
-                   'Consulta + Entregas';
+    isFinanceiro ? 'Gestão de Descontos' :
+                   SESSION.unidade ? SESSION.unidade : 'Entrega de Brindes';
+
+  // Pré-preencher unidade do modal para equipe
+  if (SESSION.unidade) {
+    const sel = document.getElementById('modal-entregador-unidade');
+    if (sel) sel.value = SESSION.unidade;
+  }
 
   document.getElementById('nav-admin').style.display      = isAdmin      ? 'block' : 'none';
   document.getElementById('nav-financeiro').style.display = isFinanceiro  ? 'block' : 'none';
   document.getElementById('sync-section').style.display   = isAdmin      ? 'block' : 'none';
 
-  // Show/hide desconto button in excecoes view based on role
-  const btnExcDesc = document.getElementById('btn-excecao-desconto');
-  if (btnExcDesc) btnExcDesc.style.display = (isAdmin || isFinanceiro) ? 'inline-flex' : 'none';
-  const cardDescExc = document.getElementById('descontos-excecao-card');
-  if (cardDescExc) cardDescExc.style.display = (isAdmin || isFinanceiro) ? 'block' : 'none';
-
-  if (isAdmin)      { showView('dashboard', document.getElementById('nav-dashboard')); }
-  else if (isFinanceiro) { showView('excecoes', document.getElementById('nav-excecoes-fin')); }
-  else              { showView('consulta-geral', document.getElementById('nav-busca')); }
+  if (isAdmin)           { showView('dashboard', document.getElementById('nav-dashboard')); }
+  else if (isFinanceiro) { showView('financeiro', document.getElementById('nav-fin-painel')); }
+  else                   { showView('consulta-geral', document.getElementById('nav-busca')); }
 }
 
 // ══ NAVIGATION ════════════════════════════════════════
@@ -731,11 +822,13 @@ const VIEW_META = {
   'consulta-geral':    ['Buscar Beneficiário','Pesquise por indicador ou indicado'],
   'admin-tools':       ['Ferramentas Admin','Importação e exportação de dados'],
   'excecoes':          ['Registrar Exceção','Libere brinde ou desconto manualmente'],
+  'financeiro':        ['Painel Financeiro','Indicadores com direito a desconto em parcela'],
 };
 function showView(v, el) {
   event && event.preventDefault();
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-  document.getElementById('view-'+v).classList.add('active');
+  const viewEl = document.getElementById('view-'+v);
+  if (viewEl) viewEl.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
   if(el) el.classList.add('active');
   const [t,s]=VIEW_META[v]||['—',''];
@@ -743,6 +836,12 @@ function showView(v, el) {
   document.getElementById('topbar-sub').textContent=s;
   if(v==='admin-tools') { renderEntregasAdmin(); renderDescontosAdmin(); }
   if(v==='excecoes')    { renderExcecoesView(); }
+  if(v==='financeiro')  { renderFinanceiroView(); }
+  // Re-preencher unidade sempre que modal for (re)aberto
+  if (SESSION && SESSION.unidade) {
+    const sel = document.getElementById('modal-entregador-unidade');
+    if (sel) sel.value = SESSION.unidade;
+  }
 }
 
 // ══ CSV PARSER ════════════════════════════════════════
@@ -771,18 +870,29 @@ function splitLine(line) {
 function processData(matRows, indRows) {
   const matMap = {};
   for (const m of matRows) {
-    // MAT columns: [0]=Data matricula [1]=Nome [2]=Email [8]=Data corrigida
     const cols = m.__cols || [];
     const email = (cols[2]||m['Email']||'').toLowerCase().trim();
     if (email) {
       matMap[email] = {
         ...m,
-        _nome: (cols[1]||m['Nome']||'').trim(),
-        _email: email,
-        _data: (cols[0]||'').trim()  // col[0] = Data da matricula
+        _nome:       (cols[1]||m['Nome']||'').trim(),
+        _email:      email,
+        _data:       (cols[0]||'').trim(),
+        _tipo_curso: (cols[9]||'').trim()  // coluna J (índice 9) = tipo do curso
       };
     }
   }
+
+  // ── Parse date helper (reusable) ──
+  const px = d => {
+    if (!d) return null;
+    let m = d.match(/^(\d{2})\/(\d{2})\/(\d{2,4})/);
+    if (m) { const yr = m[3].length===2?'20'+m[3]:m[3]; return yr+'-'+m[2]+'-'+m[1]; }
+    m = d.match(/^(\d{4}-\d{2}-\d{2})/); if (m) return m[1];
+    const p = new Date(d); if (!isNaN(p)) return p.toISOString().slice(0,10);
+    return null;
+  };
+
   const result = [];
   for (const row of indRows) {
     const cols = row.__cols || [];
@@ -791,79 +901,84 @@ function processData(matRows, indRows) {
     const indicador_email = (cols[0]||'').toLowerCase().trim();
     const indicador_nome  = (cols[1]||'').trim();
 
-    // Find Submitted At: scan from col 20 onwards looking for a date-time value
-    // Format is "DD/MM/YYYY HH:MM:SS" or "YYYY-MM-DD"
+    // Submitted At: scan from col 20 onwards
     let submit_date = '';
     for (let ci = cols.length - 1; ci >= 20; ci--) {
       const val = (cols[ci]||'').trim();
-      if (val && /\d{2}[\/\-]\d{2}[\/\-]\d{2,4}/.test(val)) {
-        submit_date = val;
-        break;
-      }
+      if (val && /\d{2}[\/\-]\d{2}[\/\-]\d{2,4}/.test(val)) { submit_date = val; break; }
     }
 
-    // Fixed slot positions (confirmed from live header):
-    // [5]=Nome_ind1 [6]=Tel_ind1 [7]=Email_ind1
-    // [8]=Deseja?   [9]=Nome_ind2 [10]=Tel_ind2 [11]=Email_ind2
-    // [12]=Deseja?  [13]=Nome_ind3 [14]=Tel_ind3 [15]=Email_ind3
-    // [16]=Deseja?  [17]=Nome_ind4 [18]=Tel_ind4 [19]=Email_ind4
     const SLOT_COLS = [[5,7],[9,11],[13,15],[17,19]];
     const slots = [];
     for (var si = 0; si < SLOT_COLS.length; si++) {
       const nc = SLOT_COLS[si][0], ec = SLOT_COLS[si][1];
       const nome  = (cols[nc]||'').trim();
       const email = (cols[ec]||'').toLowerCase().trim();
-      // Skip if empty, or UTM/placeholder values
       if (!nome && !email) continue;
       if (email === 'xxxxx' || nome === 'xxxxx') continue;
       if (nome === 'false' || nome === 'true' || nome === '0' || nome === '1') continue;
       if (nome.startsWith('{{') || email.startsWith('{{')) continue;
       if (nome === 'qr_code' || nome === 'meta' || nome.startsWith('br_rmkt')) continue;
-      if (email && !email.includes('@')) continue; // must be valid email if present
+      if (email && !email.includes('@')) continue;
       if (!nome && !email.includes('@')) continue;
       slots.push({ nome, email });
     }
     for (const slot of slots) {
       if (!slot.nome && !slot.email) continue;
       const mat = matMap[slot.email];
-      let status, data_mat='', mat_nome='';
+      let status, data_mat='', mat_nome='', tipo_curso='';
       if (mat) {
-        data_mat = mat._data || '';
-        mat_nome = mat._nome || mat['Nome']||'';
-        try {
-          // Parse date, strip time component to compare only dates
-          const px = d => {
-            if (!d) return null;
-            // DD/MM/YYYY
-            let m = d.match(/^(\d{2})\/(\d{2})\/(\d{2,4})/);
-            if (m) {
-              const yr = m[3].length===2 ? '20'+m[3] : m[3];
-              return yr+'-'+m[2]+'-'+m[1]; // return as YYYY-MM-DD string
-            }
-            // YYYY-MM-DD HH:MM:SS or YYYY-MM-DDTHH:MM:SS
-            m = d.match(/^(\d{4}-\d{2}-\d{2})/);
-            if (m) return m[1]; // return only date part
-            // JS Date string fallback
-            const parsed = new Date(d);
-            if (!isNaN(parsed)) {
-              return parsed.getFullYear()+'-'+
-                String(parsed.getMonth()+1).padStart(2,'0')+'-'+
-                String(parsed.getDate()).padStart(2,'0');
-            }
-            return null;
-          };
-          const dI=px(submit_date), dM=px(data_mat);
-          if (!dI || !dM) {
-            status = 'Aguardando Matrícula';
-          } else {
-            // Compare date strings directly (YYYY-MM-DD format sorts correctly)
-            status = dM >= dI ? 'Benefício Liberado' : 'Regra de Data Inválida';
-          }
-        } catch { status='Aguardando Matrícula'; }
-      } else { status='Aguardando Matrícula'; }
-      result.push({ indicador_nome, indicador_email, indicado_nome:slot.nome, indicado_email:slot.email, data_indicacao:submit_date, data_matricula:data_mat, matriculado_nome:mat_nome, status });
+        data_mat   = mat._data || '';
+        mat_nome   = mat._nome || '';
+        tipo_curso = mat._tipo_curso || '';
+        const dI = px(submit_date), dM = px(data_mat);
+        if (!dI || !dM) { status = 'Aguardando Matrícula'; }
+        else { status = dM >= dI ? 'Benefício Liberado' : 'Regra de Data Inválida'; }
+      } else { status = 'Aguardando Matrícula'; }
+      result.push({
+        indicador_nome, indicador_email,
+        indicado_nome: slot.nome, indicado_email: slot.email,
+        data_indicacao: submit_date, data_matricula: data_mat,
+        matriculado_nome: mat_nome, tipo_curso, status
+      });
     }
   }
+
+  // ── Compute per-indicador MGM benefits ──
+  // Group valid MGM indicações by indicador
+  const byIndicador = {};
+  result.forEach(r => {
+    if (!isValidaMGM(r.data_indicacao, r.data_matricula)) return;
+    if (!byIndicador[r.indicador_email]) byIndicador[r.indicador_email] = [];
+    byIndicador[r.indicador_email].push(r);
+  });
+  // Sort each group by data_indicacao ASC and assign seq/beneficio
+  Object.keys(byIndicador).forEach(email => {
+    const sorted = byIndicador[email].sort((a,b) => (px(a.data_indicacao)||'') < (px(b.data_indicacao)||'') ? -1 : 1);
+    const beneficios = computaBeneficios(sorted.map(r => ({
+      data_indicacao: r.data_indicacao,
+      data_matricula: r.data_matricula,
+      tipo_curso:     r.tipo_curso,
+      indicado_nome:  r.indicado_nome,
+      indicado_email: r.indicado_email
+    })));
+    // Write back seq and beneficio to each result row
+    beneficios.forEach(b => {
+      const row = result.find(r =>
+        r.indicador_email === email &&
+        r.indicado_email === b.indicado_email &&
+        r.data_indicacao === b.data_indicacao
+      );
+      if (row) {
+        row.seq_mgm        = b.seq;
+        row.beneficio_mgm  = b.beneficio;      // 'brinde' | 'desconto' | 'nenhum'
+        row.desconto_pct   = b.desconto_pct;
+        row.parcelas_desc  = b.parcelas;
+        row.nivel_curso    = b.nivel;
+      }
+    });
+  });
+
   return result;
 }
 
@@ -1072,30 +1187,43 @@ function searchGeral(){
     // Indicador brinde row
     const indBrinde = entregaInd
       ? `<div class="brinde-entregue">🎁 Brinde entregue ao Indicador</div><div class="entrega-info">Por <strong>${cap(entregaInd.entregador)}</strong>${entregaInd.unidade?' · '+cap(entregaInd.unidade):''}${entregaInd.data?' · '+fmtDate(entregaInd.data):''}</div>`
-      : (lib>0 ? `<button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="abrirModal('${esc(g.nome)}','${esc(g.email)}','','')">🎁 Marcar entrega ao Indicador</button>` : '');
+      : lib>0
+        ? `<button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="abrirModal('${esc(g.nome)}','${esc(g.email)}','','','brinde')">🎁 Marcar entrega ao Indicador</button>`
+        : isAdmin
+          ? `<button class="btn btn-sm btn-danger" style="margin-top:4px" onclick="abrirModal('${esc(g.nome)}','${esc(g.email)}','','','excecao-brinde')">⚠️ Brinde por Exceção</button>`
+          : '';
 
     const rows=g.list.map(r=>{
       const entregaInddo=getEntrega(r.indicado_email, r.indicado_nome, r.indicado_tel||'');
-      const descontoInddo=getDesconto(r.indicado_email, r.indicado_nome, r.indicado_tel||'');
+      const descontoInddo=getDesconto(r.indicador_email, r.indicador_nome, ''); // desconto é do indicador
       const highlight=g.matchedInddo.includes(r.indicado_email)?'background:rgba(79,142,247,0.05);':'';
+      const showDesconto = SESSION && SESSION.role !== 'colab'; // colab não vê desconto
+
+      // Brinde: mostra beneficio_mgm se disponível
+      const brindeMgmTag = r.beneficio_mgm === 'brinde'
+        ? `<span style="font-size:10px;color:var(--green);display:block;margin-bottom:4px">✅ Elegível (${r.tipo_curso||''})</span>`
+        : r.beneficio_mgm === 'desconto'
+          ? `<span style="font-size:10px;color:var(--teal);display:block;margin-bottom:4px">💰 Desconto: ${r.desconto_pct}% em ${r.parcelas_desc}x</span>`
+          : '';
 
       const brindeTd = r.status==='Benefício Liberado'
         ? `<td>${entregaInddo
             ? `<div><span class="brinde-entregue">🎁 Entregue</span><div class="entrega-info">Por <strong>${cap(entregaInddo.entregador)}</strong>${entregaInddo.unidade?' · '+cap(entregaInddo.unidade):''}${entregaInddo.data?'<br>'+fmtDate(entregaInddo.data):''}</div></div>`
-            : isAdminOrColab()
-              ? `<div><span class="brinde-pendente">⏳ Pendente</span><br><button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="abrirModal('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}','brinde')">🎁 Marcar Entrega</button></div>`
-              : `<span class="brinde-pendente">⏳ Pendente</span>`
+            : `<div>${brindeMgmTag}<span class="brinde-pendente">⏳ Pendente</span><br><button class="btn btn-sm btn-primary" style="margin-top:4px" onclick="abrirModal('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}','brinde')">🎁 Marcar Entrega</button></div>`
           }</td>`
-        : '<td>—</td>';
+        : isAdmin
+          ? `<td><button class="btn btn-sm btn-danger" onclick="abrirModal('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}','excecao-brinde')">⚠️ Exceção Brinde</button></td>`
+          : '<td>—</td>';
 
-      const descontoTd = r.status==='Benefício Liberado'
+      // Desconto: apenas admin vê, e referente ao INDICADOR (não indicado)
+      const descontoTd = showDesconto && r.beneficio_mgm === 'desconto'
         ? `<td>${descontoInddo
-            ? `<div><span class="desconto-concedido">💰 Liberado</span><div class="entrega-info">Por <strong>${cap(descontoInddo.responsavel)}</strong>${descontoInddo.data?'<br>'+fmtDate(descontoInddo.data):''}</div></div>`
+            ? `<div><span class="desconto-concedido">✅ Lançado</span><div class="entrega-info">Por <strong>${cap(descontoInddo.responsavel)}</strong>${descontoInddo.data?'<br>'+fmtDate(descontoInddo.data):''}</div></div>`
             : canMarkDesconto()
-              ? `<div><span class="desconto-pendente">⏳ Pendente</span><br><button class="btn btn-sm btn-teal" style="margin-top:4px" onclick="abrirModal('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}','desconto')">💰 Marcar Desconto</button></div>`
-              : `<span class="desconto-pendente">⏳ Pendente</span>`
+              ? `<div><span class="desconto-pendente">⏳ Pendente</span><div style="font-size:11px;color:var(--teal);margin:3px 0">${r.desconto_pct}% em ${r.parcelas_desc}x parcela${r.parcelas_desc>1?'s':''}</div><button class="btn btn-sm btn-teal" style="margin-top:2px" onclick="abrirModalLancamento('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}',${r.desconto_pct},${r.parcelas_desc})">💰 Lançar Desconto</button></div>`
+              : `<span class="desconto-pendente">⏳ Pendente (${r.desconto_pct}% × ${r.parcelas_desc}x)</span>`
           }</td>`
-        : '<td>—</td>';
+        : showDesconto ? '<td><span style="color:var(--muted2);font-size:12px">—</span></td>' : '';
 
       return `<tr style="${highlight}">
         <td class="tn no-copy">${cap(r.indicado_nome)}</td>
@@ -1126,7 +1254,7 @@ function searchGeral(){
       </div>
       <div class="ind-body">
         <div class="tscroll">
-          <table><thead><tr><th>Indicado</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>🎁 Brinde</th><th>💰 Desconto</th></tr></thead>
+          <table><thead><tr><th>Indicado</th><th>Data Indicação</th><th>Data Matrícula</th><th>Status</th><th>🎁 Brinde</th>${SESSION&&SESSION.role!=='colab'?'<th>💰 Desconto Indicador</th>':''}</tr></thead>
           <tbody>${rows}</tbody></table>
         </div>
       </div>
@@ -1171,9 +1299,14 @@ function abrirModal(indicador_nome, indicador_email, indicado_nome, indicado_ema
     </label>
   `).join('');
 
-  // Fields: brinde needs entregador+unidade; desconto needs indicacaoRef+responsavel
-  document.getElementById('modal-fields-brinde').style.display  = isBrinde   ? 'block' : 'none';
+  // Fields visibility
+  document.getElementById('modal-fields-brinde').style.display   = isBrinde   ? 'block' : 'none';
   document.getElementById('modal-fields-desconto').style.display = isDesconto ? 'block' : 'none';
+  // Motivo only for excecao-desconto
+  const motivoField = document.getElementById('modal-field-motivo');
+  if (motivoField) motivoField.style.display = (mode === 'excecao-desconto') ? 'block' : 'none';
+  if (document.getElementById('modal-motivo')) document.getElementById('modal-motivo').value = '';
+  if (document.getElementById('modal-mes-ano')) document.getElementById('modal-mes-ano').value = '';
 
   // Populate desconto dropdown with valid indicações if not exception
   if (isDesconto) {
@@ -1213,8 +1346,9 @@ async function confirmarEntrega() {
   const errEl = document.getElementById('modal-error');
   const mode = modalCtx ? modalCtx.mode : 'brinde';
   const isBrinde   = mode === 'brinde'  || mode === 'excecao-brinde';
-  const isDesconto = mode === 'desconto' || mode === 'excecao-desconto';
+  const isDesconto = mode === 'desconto' || mode === 'excecao-desconto' || mode === 'lancamento';
   const isExcecao  = mode.startsWith('excecao');
+  const isLancamento = mode === 'lancamento';
 
   // For excecao modes: read email/nome from free-form fields and inject a virtual checkbox
   if (isExcecao) {
@@ -1227,16 +1361,21 @@ async function confirmarEntrega() {
     }
     modalCtx.indicado_email = excEmail;
     modalCtx.indicado_nome  = excNome;
-    // Inject virtual hidden checkbox so the selected[] logic below picks it up
     document.getElementById('modal-checkboxes').innerHTML =
       `<input type="checkbox" id="chk-indicado" value="${excEmail}" checked style="display:none">`;
+  }
+
+  // For lancamento: the target is the INDICADOR
+  if (isLancamento) {
+    document.getElementById('modal-checkboxes').innerHTML =
+      `<input type="checkbox" id="chk-indicador" value="${modalCtx.indicador_email}" checked style="display:none">`;
   }
 
   const chkInd   = document.getElementById('chk-indicador');
   const chkInddo = document.getElementById('chk-indicado');
   const selected = [];
-  if (chkInd   && chkInd.checked)   selected.push({ email: chkInd.value,   tipo:'indicador', nome: modalCtx.indicador_nome });
-  if (chkInddo && chkInddo.checked) selected.push({ email: chkInddo.value,  tipo: isExcecao ? 'excecao' : 'indicado', nome: modalCtx.indicado_nome });
+  if (chkInd   && chkInd.checked)   selected.push({ email: chkInd.value,  tipo: isLancamento ? 'lancamento' : 'indicador', nome: modalCtx.indicador_nome });
+  if (chkInddo && chkInddo.checked) selected.push({ email: chkInddo.value, tipo: isExcecao ? 'excecao' : 'indicado',       nome: modalCtx.indicado_nome  });
   if (!selected.length) { errEl.textContent = 'Selecione ao menos um beneficiário.'; return; }
 
   if (isBrinde) {
@@ -1252,7 +1391,14 @@ async function confirmarEntrega() {
     const indicacaoRef = document.getElementById('modal-indicacao-ref').value.trim();
     if (!responsavel)  { errEl.textContent = 'Informe o nome do responsável.'; return; }
     if (!indicacaoRef) { errEl.textContent = 'Selecione a indicação referente.'; return; }
-    for (const s of selected) await setDesconto(s.email, indicacaoRef, responsavel, s.nome);
+    const mesEl = document.getElementById('modal-mes-ano');
+    const motivoEl = document.getElementById('modal-motivo');
+    const mesAno = mesEl ? mesEl.value.trim() : '';
+    const motivo = motivoEl ? motivoEl.value.trim() : '';
+    const ref = isLancamento
+      ? indicacaoRef + (mesAno ? ' | Mês: '+mesAno : '')
+      : (indicacaoRef + (mesAno ? ' | Mês: '+mesAno : '') + (motivo ? ' | Motivo: '+motivo : ''));
+    for (const s of selected) await setDesconto(s.email, ref, responsavel, s.nome);
   }
 
   fecharModal();
@@ -1263,6 +1409,7 @@ async function confirmarEntrega() {
   if (activeView && activeView.id === 'view-dashboard')         renderDashTable();
   if (activeView && activeView.id === 'view-admin-tools')       { renderEntregasAdmin(); renderDescontosAdmin(); }
   if (activeView && activeView.id === 'view-excecoes')          renderExcecoesView();
+  if (activeView && activeView.id === 'view-financeiro')        renderFinanceiroView();
 }
 
 // ══ ADMIN TOOLS ══════════════════════════════════════
@@ -1387,7 +1534,103 @@ function importCSV(event) {
   reader.readAsText(file, 'UTF-8');
 }
 
-// ══ EXCEÇÕES ═════════════════════════════════════════
+// ══ PAINEL FINANCEIRO ════════════════════════════════
+function renderFinanceiroView() {
+  const container = document.getElementById('fin-results');
+  if (!container) return;
+
+  // Filtrar apenas indicações MGM válidas com benefício = desconto (seq >= 2)
+  const rows = DATA.filter(r => r.beneficio_mgm === 'desconto');
+
+  if (!rows.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">💰</div><p>Nenhum indicador com direito a desconto ainda.</p></div>';
+    return;
+  }
+
+  // Agrupar por indicador
+  const map = {};
+  rows.forEach(r => {
+    const k = r.indicador_email || r.indicador_nome;
+    if (!map[k]) map[k] = { nome: r.indicador_nome, email: r.indicador_email, items: [] };
+    map[k].items.push(r);
+  });
+
+  container.innerHTML = Object.values(map).map(g => {
+    const totalParcelas = g.items.reduce((s, r) => s + (r.parcelas_desc||0), 0);
+    // Deduplicate: same indicado may appear multiple times — take highest pct
+    const rows_html = g.items.map(r => {
+      const d = getDesconto(r.indicador_email, r.indicador_nome, '');
+      // Check if THIS specific indicação já foi lançada
+      const jaLancado = d && d.indicacoes && d.indicacoes.some(i => i.includes(r.indicado_nome||r.indicado_email));
+      const statusPill = jaLancado
+        ? `<span class="desconto-concedido">✅ Lançado</span><div class="entrega-info">${fmtDate(d.data)}</div>`
+        : `<span class="desconto-pendente">⏳ Pendente</span>`;
+      const btnLancar = (!jaLancado && SESSION && SESSION.role==='financeiro')
+        ? `<button class="btn btn-sm btn-teal" style="margin-top:4px" onclick="abrirModalLancamento('${esc(r.indicador_nome)}','${esc(r.indicador_email)}','${esc(r.indicado_nome)}','${esc(r.indicado_email)}',${r.desconto_pct},${r.parcelas_desc})">💰 Registrar Lançamento</button>`
+        : '';
+      const nivelLabel = r.nivel_curso==='alto' ? '🔵 Mestrado/Doutorado' : r.nivel_curso==='medio' ? '🟢 Especialização' : '🟡 Outro';
+      return `<tr>
+        <td class="tn">${cap(r.indicado_nome)}</td>
+        <td><span style="font-size:12px;color:var(--muted)">${nivelLabel}</span><br><strong style="color:var(--teal)">${r.desconto_pct}% OFF</strong></td>
+        <td style="font-weight:600;color:var(--teal)">${r.parcelas_desc} parcela${r.parcelas_desc>1?'s':''}</td>
+        <td class="td">${fmtDate(r.data_matricula)}</td>
+        <td><div>${statusPill}${btnLancar}</div></td>
+      </tr>`;
+    }).join('');
+
+    return `<div class="ind-card" style="margin-bottom:12px;overflow:hidden;border-radius:var(--r);border:1px solid var(--border)">
+      <div style="padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <h4 style="font-size:14px;font-weight:600">${cap(g.nome)}</h4>
+          <p style="font-size:12px;color:var(--muted);margin-top:2px">${g.email||''}</p>
+        </div>
+        <div style="text-align:right">
+          <span class="pill pill-lib">${g.items.length} desconto${g.items.length>1?'s':''}</span>
+          <div style="font-size:11px;color:var(--teal);margin-top:4px">Total: <strong>${totalParcelas} parcela${totalParcelas>1?'s':''}</strong></div>
+        </div>
+      </div>
+      <div class="tscroll">
+        <table><thead><tr>
+          <th>Indicado</th><th>Nível / Desconto</th><th>Parcelas</th><th>Data Matrícula</th><th>Status Lançamento</th>
+        </tr></thead><tbody>${rows_html}</tbody></table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function abrirModalLancamento(ind_nome, ind_email, indicado_nome, indicado_email, pct, parcelas) {
+  modalCtx = {
+    indicador_nome: ind_nome, indicador_email: ind_email,
+    indicado_nome, indicado_email,
+    mode: 'lancamento', desconto_pct: pct, parcelas
+  };
+  document.getElementById('modal-title').textContent = '💰 Registrar Lançamento de Desconto';
+  document.getElementById('modal-excecao-banner').style.display = 'none';
+  document.getElementById('modal-beneficiario-info').innerHTML =
+    `<strong>Indicador:</strong> ${cap(ind_nome)}<br>
+     <strong>Referente ao indicado:</strong> ${cap(indicado_nome)}<br>
+     <strong>Desconto:</strong> <span style="color:var(--teal);font-weight:600">${pct}% em ${parcelas} parcela${parcelas>1?'s':''}</span>`;
+  document.getElementById('modal-checkboxes').innerHTML = '';
+  document.getElementById('modal-fields-brinde').style.display   = 'none';
+  document.getElementById('modal-fields-desconto').style.display = 'block';
+
+  // Pré-selecionar indicação
+  const refSelect = document.getElementById('modal-indicacao-ref');
+  refSelect.innerHTML = `<option value="${esc(indicado_nome+' — '+pct+'% ('+parcelas+' parc.)')}" selected>
+    ${cap(indicado_nome)} — ${pct}% em ${parcelas} parcela${parcelas>1?'s':''}
+  </option>`;
+
+  // Mês/ano e motivo
+  const motivoField = document.getElementById('modal-field-motivo');
+  if (motivoField) motivoField.style.display = 'none';
+  if (document.getElementById('modal-mes-ano')) document.getElementById('modal-mes-ano').value = '';
+
+  const confirmBtn = document.getElementById('modal-confirm-btn');
+
+  document.getElementById('modal-responsavel-nome').value = '';
+  document.getElementById('modal-error').textContent = '';
+  document.getElementById('modal-entrega').classList.remove('hidden');
+}
 function abrirModalExcecao(tipo) {
   const mode = tipo === 'desconto' ? 'excecao-desconto' : 'excecao-brinde';
   modalCtx = { indicador_nome:'', indicador_email:'', indicado_nome:'', indicado_email:'', mode };
